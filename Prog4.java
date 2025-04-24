@@ -9,106 +9,168 @@ import java.sql.*;
 import java.util.*;
 
 public class Prog4 {
-    public static void main(String[] args) {
-        // validate cl inputs
-        if (args.length != 2) {
-            System.out.println("use java Prog3 <username> <password>");
-            System.exit(-1);
-        }
-        String username = args[0];
-        String password = args[1];
-        String oracle = "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
-        // get states for input validation (this is andrew test)
-
-        try {
-            // get oracle connection
-            Class.forName("oracle.jdbc.OracleDriver");
-            Connection conn = DriverManager.getConnection(oracle, username, password);
-            Scanner scanner = new Scanner(System.in);
-
-            // display menu while not quit
-            while (true) {
-                int choice = menu(scanner);
-
-                // query 1 menu
-                if (choice == 1) {
-                    System.out.println("enter a year (1990, 2000, 2010, or 2020): ");
-                    int year = scanner.nextInt();
-                    scanner.nextLine();
-
-                    System.out.println("enter a category (auto, bus, truck, or motorcycle): ");
-                    String cat = scanner.nextLine().trim().toLowerCase();
-                    System.out.println();
-                    query1(conn, year, cat);
-                }
-
-                if (choice == 10) {
-                    System.out.println("goodbye!");
-                    conn.close();
-                    System.exit(-1);
-                }
-            }
-        } catch (ClassNotFoundException e) {
-            System.out.println("oracle error");
-            System.exit(-1);
-        } catch (SQLException e) {
-            System.out.println("error executing sql");
-            System.exit(-1);
-        }
-    }
-
-    public static int menu(Scanner scanner) {
-        // Display command menu, take and validat euser input to ensure
-        // process commands
-        System.out.println("select a query");
+    public static int getMenuChoice(Scanner scanner) {
+        System.out.println("Select a query");
         System.out.println("1. Add, Update or Delete a Member");
         System.out.println("2. Add Update, or Delete a Ski Pass");
         System.out.println("3. Add, Update, or Delete an Equipment Inventory Record");
         System.out.println("4. Add, Update, or Delete an Equipment Rental Record");
-        System.out.println("5. Add, Update, or Delete a LEsson Purchase Record");
-        System.out.println("6. Query 1");
-        System.out.println("7. Query 2");
-        System.out.println("8. Query 3");
-        System.out.println("9. Query 4");
-        System.out.println("10. Quit");
+        System.out.println("5. Add, Update, or Delete a Lesson Purchase Record");
 
-        System.out.println("input your choice:");
-        while (!scanner.hasNextInt()) {
-            System.out.println("you must enter a number 1-10");
-            scanner.next();
-        }
-        return scanner.nextInt();
+        System.out.println("6. Get Member Ski Lesson Details");
+        System.out.println("7. Get Ski Pass Usage Details");
+        System.out.println("8. Get Open Intermediate Trails");
+        System.out.println("9. Query 4 (Custom Query)");
+        System.out.println("10. Quit");
+        return 0;
     }
 
-    public static void query1(Connection conn, int year, String cat) {
-        // EXAMPLE QUERY THAT I LEFT FROM MY PROG3 FILE
-        // sql query string
-        String sql = "select state, " + cat +
-                " from (select state, " + cat + " from dylanchapman.MVRD" + year +
-                " order by " + cat + " desc) where rownum <= 10";
+    public static void Member() {
+
+    }
+
+    public static void SkiPass() {
+
+
+    }
+
+    public static void EquipmentInventoryRecord() {
+
+    }
+
+    public static void EquipmentRentalRecord() {
+
+    }
+
+    public static void LessonPurchaseRecord() {
+
+    }
+
+    public static void GetMemberSkiLessonDetails() {
+
+    }
+
+    public static void GetSkiPassUsageDetails() {
+
+    }
+
+    public static void GetOpenIntermediateTrails() {
+
+    }
+
+    public static void CustomQuery() {
+
+    }
+
+
+
+
+
+
+
+
+    public static void main(String[] args) {
+        final String oracleURL = "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
+
+        String username = null; // Oracle DBMS username & password
+        String password = null;
+
+        if (args.length == 2) {
+            username = args[0];
+            password = args[1];
+        }
+        else {
+            System.out.println("""
+                    Usage: java JDBC <username> <password>
+                           <username> is your Oracle DBMS username,
+                           <password> is your Oracle password (not your system password)""");
+            System.exit(-1);
+        }
+
+        // Load (Oracle) JDBC driver by initializing its base class, 'oracle.jdbc.OracleDriver'
+        try {Class.forName("oracle.jdbc.OracleDriver");}
+        catch (ClassNotFoundException e) {
+
+            System.err.println("""
+                    *** ClassNotFoundException: Error loading Oracle JDBC driver.
+                    \tPerhaps the driver is not on the Classpath?""");
+            System.exit(-1);
+        }
+
+        // Make & return a DB connection to user's Oracle database
+        Connection dbconn = null;
 
         try {
-            // prepare query
-            Statement stmt = conn.createStatement();
-            ResultSet answer = stmt.executeQuery(sql);
+            dbconn = DriverManager.getConnection(oracleURL,username,password);
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not open JDBC connection.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+            System.exit(-1);
+        }
 
-            // display results
-            System.out.println("query1 results for " + cat + "'s in " + year + ": ");
-            System.out.println("---------------------------------");
-            System.out.printf(" %-20s %-10s\n", "state", "year");
-            System.out.println("---------------------------------");
 
-            // while has andwer rows
-            while (answer.next()) {
-                String state = answer.getString("state");
-                int quantity = answer.getInt(cat);
+        // Now that we've done the "pre-processing," let's get started with the queries!
+        // Queries will be built by these String objects (multiple times)
+        Scanner scanner = new Scanner(System.in);
+        Statement statement;
 
-                // format results
-                System.out.printf(" %-20s %-10d\n", state, quantity);
-            }
+        try {
+            int decision = getMenuChoice(scanner);
+            scanner.nextLine();
             System.out.println();
-        } catch (SQLException e) {
-            System.out.println("error executing sql");
+
+            while (decision != 10) {
+                statement = dbconn.createStatement();
+                switch (decision) {
+                    case 1:
+                        Member();
+                        break;
+
+                    case 2:
+                        SkiPass();
+                        break;
+
+                    case 3:
+                        EquipmentInventoryRecord();
+                        break;
+
+                    case 4:
+                        EquipmentRentalRecord();
+                        break;
+
+                    case 5:
+                        LessonPurchaseRecord();
+                        break;
+
+                    case 6:
+                        GetMemberSkiLessonDetails();
+                        break;
+
+                    case 7:
+                        GetSkiPassUsageDetails();
+                        break;
+
+                    case 8:
+                        GetOpenIntermediateTrails();
+                        break;
+
+                    case 9:
+                        CustomQuery();
+                        break;
+                }
+                statement.close();
+                decision = getMenuChoice(scanner);
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+            System.exit(-1);
         }
 
 

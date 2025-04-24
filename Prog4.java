@@ -18,7 +18,7 @@ public class Prog4 {
             String username = args[0];
             String password = args[1];
             String oracle = "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
-            // get states for input validation
+            // get states for input validation (this is andrew test)
 
             try {
                     // get oracle connection

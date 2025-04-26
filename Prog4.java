@@ -10,9 +10,11 @@ import java.util.*;
 // export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${CLASSPATH}
 
 public class Prog4 {
+
+
+
     // Will increment each time a new Member is added
     public static int memberID = 0;
-
 
     /*
     Name: getMenuChoice
@@ -61,128 +63,63 @@ public class Prog4 {
         }
     }
 
-    public static void Member(Scanner scanner, Connection dbconn) {
-        String query;
-        String specifier;
-        while (true) {
-            System.out.println("Would you like to ADD, UPDATE, or DELETE a Member?");
-            specifier = scanner.nextLine().trim().toUpperCase();
-
-            if (specifier.matches("ADD|UPDATE|DELETE"))
-                break;
-            else
-                System.err.println("Invalid query specifier! Please try again.\n");
-        }
-
-        switch (specifier) {
-            case "ADD":
-                System.out.println("""
-                        Please add all necessary fields, and SEPARATE THEM WITH COMMAS
-                        <Name (String)>, <Phone (int)>, <Email (String)>, <DOB (YYYY-MM-DD)>, <Emergency Contact (int)>
-                        """);
-
-                String input  = scanner.nextLine().trim();
-                String[] attributes = input.split(",");
-                for (String attribute : attributes) attribute = attribute.trim();
-
-                query = String.format(
-                        "INSERT INTO dylanchapman.Member VALUES(%d, '%s', %d, '%s', TO_DATE('%s', 'YYYY-MM-DD'), %d)",
-                        memberID,
-                        attributes[0].trim(), // Name
-                        Integer.parseInt(attributes[1].trim()), // Phone
-                        attributes[2].trim(), // Email
-                        attributes[3].trim(), // DOB
-                        Integer.parseInt(attributes[4].trim()) // Emergency Contact
-                );
-
-
-                try {
-                    Statement statement = dbconn.createStatement();
-                    statement.executeQuery(query);
-                    System.out.println("Member added successfully! Your member ID is " + memberID);
-                    memberID++;
-                }
-
-                catch (SQLException e) {
-                    System.err.println("*** SQLException: Could not fetch query results.");
-                    System.err.println("\tMessage:   " + e.getMessage());
-                    System.err.println("\tSQLState:  " + e.getSQLState());
-                    System.err.println("\tErrorCode: " + e.getErrorCode());
-                }
-
-                break;
-
-
-            case "UPDATE":
-                System.out.println("Please enter the MemberID of the member you wish to update:");
-                query = scanner.nextLine().trim();
-                break;
-
-
-            case "DELETE":
-                System.out.println("Please insert the MemberID of the member you wish to delete:");
-                query = scanner.nextLine().trim();
-                break;
-        }
+    public static void addMember(Scanner scanner, Connection dbconn) {
 
     }
 
-    public static void SkiPass(Scanner scanner, Connection dbconn) {
-        String specifier;
-        while (true) {
-            System.out.println("Would you like to ADD, UPDATE, or DELETE a Ski Pass?");
-            specifier = scanner.nextLine().trim().toUpperCase();
-
-            if (specifier.matches("ADD|UPDATE|DELETE"))
-                break;
-            else
-                System.err.println("Invalid query specifier! Please try again.\n");
-        }
+    public static void updateMember(Scanner scanner, Connection dbconn) {
 
     }
 
-    public static void EquipmentInventoryRecord(Scanner scanner, Connection dbconn) {
-        String specifier;
-        while (true) {
-            System.out.println("Would you like to ADD, UPDATE, or DELETE an Equipment Inventory Record?");
-            specifier = scanner.nextLine().trim().toUpperCase();
-
-            if (specifier.matches("ADD|UPDATE|DELETE"))
-                break;
-            else
-                System.err.println("Invalid query specifier! Please try again.\n");
-        }
-
+    public static void deleteMember(Scanner scanner, Connection dbconn) {
 
     }
 
-    public static void EquipmentRentalRecord(Scanner scanner, Connection dbconn) {
-        String specifier;
-        while (true) {
-            System.out.println("Would you like to ADD, UPDATE, or DELETE an Equipment Rental Record?");
-            specifier = scanner.nextLine().trim().toUpperCase();
-
-            if (specifier.matches("ADD|UPDATE|DELETE"))
-                break;
-            else
-                System.err.println("Invalid query specifier! Please try again.\n");
-        }
-
+    public static void addSkiPass(Scanner scanner, Connection dbconn) {
 
     }
 
-    public static void LessonPurchaseRecord(Scanner scanner, Connection dbconn) {
-        String specifier;
-        while (true) {
-            System.out.println("Would you like to ADD, UPDATE, or DELETE a Lesson Purchase Record?");
-            specifier = scanner.nextLine().trim().toUpperCase();
+    public static void updateSkiPass(Scanner scanner, Connection dbconn) {
 
-            if (specifier.matches("ADD|UPDATE|DELETE"))
-                break;
-            else
-                System.err.println("Invalid query specifier! Please try again.\n");
-        }
+    }
 
+    public static void deleteSkiPass(Scanner scanner, Connection dbconn) {
+
+    }
+
+    public static void addEquipmentInventory(Scanner scanner, Connection dbconn) {
+
+    }
+
+    public static void updateEquipmentInventory(Scanner scanner, Connection dbconn) {
+
+    }
+
+    public static void deleteEquipmentInventory(Scanner scanner, Connection dbconn) {
+
+    }
+
+    public static void addEquipmentRental(Scanner scanner, Connection dbconn) {
+
+    }
+
+    public static void updateEquipmentRental(Scanner scanner, Connection dbconn) {
+
+    }
+
+    public static void deleteEquipmentRental(Scanner scanner, Connection dbconn) {
+
+    }
+
+    public static void addLessonPurchase(Scanner scanner, Connection dbconn) {
+
+    }
+
+    public static void updateLessonPurchase(Scanner scanner, Connection dbconn) {
+
+    }
+
+    public static void deleteLessonPurchase(Scanner scanner, Connection dbconn) {
 
     }
 
@@ -260,43 +197,130 @@ public class Prog4 {
 
             while (decision != 10) {
                 statement = dbconn.createStatement();
+
                 switch (decision) {
-                    case 1:
-                        Member(scanner, dbconn);
-                        break;
+                    case 1 -> {
+                        String specifier;
+                        System.out.println("Would you like to ADD, UPDATE, or DELETE a Member");
 
-                    case 2:
-                        SkiPass(scanner, dbconn);
-                        break;
+                        while (true) {
+                            specifier = scanner.nextLine().trim().toUpperCase();
 
-                    case 3:
-                        EquipmentInventoryRecord(scanner, dbconn);
-                        break;
+                            if (specifier.equals("ADD")) {
+                                addMember(scanner, dbconn);
+                                break;
+                            }
+                            else if (specifier.equals("UPDATE")) {
+                                updateMember(scanner, dbconn);
+                                break;
+                            }
+                            else if (specifier.equals("DELETE")) {
+                                deleteMember(scanner, dbconn);
+                                break;
+                            }
 
-                    case 4:
-                        EquipmentRentalRecord(scanner, dbconn);
-                        break;
+                            else System.err.println("Invalid query specifier! Please try again.\n");
+                        }
+                    }
+                    case 2 -> {
+                        String specifier;
+                        System.out.println("Would you like to ADD, UPDATE, or DELETE a Ski Pass");
 
-                    case 5:
-                        LessonPurchaseRecord(scanner, dbconn);
-                        break;
+                        while (true) {
+                            specifier = scanner.nextLine().trim().toUpperCase();
 
-                    case 6:
-                        GetMemberSkiLessonDetails();
-                        break;
+                            if (specifier.equals("ADD")) {
+                                addSkiPass(scanner, dbconn);
+                                break;
+                            }
+                            else if (specifier.equals("UPDATE")) {
+                                updateSkiPass(scanner, dbconn);
+                                break;
+                            }
+                            else if (specifier.equals("DELETE")) {
+                                deleteSkiPass(scanner, dbconn);
+                                break;
+                            }
 
-                    case 7:
-                        GetSkiPassUsageDetails();
-                        break;
+                            else System.err.println("Invalid query specifier! Please try again.\n");
+                        }
+                    }
+                    case 3 -> {
+                        String specifier;
+                        System.out.println("Would you like to ADD, UPDATE, or DELETE an Equipment Inventory Record?");
 
-                    case 8:
-                        GetOpenIntermediateTrails();
-                        break;
+                        while (true) {
+                            specifier = scanner.nextLine().trim().toUpperCase();
 
-                    case 9:
-                        CustomQuery();
-                        break;
+                            if (specifier.equals("ADD")) {
+                                addEquipmentInventory(scanner, dbconn);
+                                break;
+                            }
+                            else if (specifier.equals("UPDATE")) {
+                                updateEquipmentInventory(scanner, dbconn);
+                                break;
+                            }
+                            else if (specifier.equals("DELETE")) {
+                                deleteEquipmentInventory(scanner, dbconn);
+                                break;
+                            }
+
+                            else System.err.println("Invalid query specifier! Please try again.\n");
+                        }
+                    }
+                    case 4 -> {
+                        String specifier;
+                        System.out.println("Would you like to ADD, UPDATE, or DELETE an Equipment Rental Record?");
+
+                        while (true) {
+                            specifier = scanner.nextLine().trim().toUpperCase();
+
+                            if (specifier.equals("ADD")) {
+                                addEquipmentRental(scanner, dbconn);
+                                break;
+                            }
+                            else if (specifier.equals("UPDATE")) {
+                                updateEquipmentRental(scanner, dbconn);
+                                break;
+                            }
+                            else if (specifier.equals("DELETE")) {
+                                deleteEquipmentRental(scanner, dbconn);
+                                break;
+                            }
+
+                            else System.err.println("Invalid query specifier! Please try again.\n");
+                        }
+                    }
+                    case 5 -> {
+                        String specifier;
+                        System.out.println("Would you like to ADD, UPDATE, or DELETE a Lesson Purchase Record");
+
+                        while (true) {
+                            specifier = scanner.nextLine().trim().toUpperCase();
+
+                            if (specifier.equals("ADD")) {
+                                addLessonPurchase(scanner, dbconn);
+                                break;
+                            }
+                            else if (specifier.equals("UPDATE")) {
+                                updateLessonPurchase(scanner, dbconn);
+                                break;
+                            }
+                            else if (specifier.equals("DELETE")) {
+                                deleteLessonPurchase(scanner, dbconn);
+                                break;
+                            }
+
+                            else System.err.println("Invalid query specifier! Please try again.\n");
+                        }
+                    }
+
+                    case 6 -> GetMemberSkiLessonDetails();
+                    case 7 -> GetSkiPassUsageDetails();
+                    case 8 -> GetOpenIntermediateTrails();
+                    case 9 -> CustomQuery();
                 }
+
                 statement.close();
                 decision = getMenuChoice(scanner);
             }

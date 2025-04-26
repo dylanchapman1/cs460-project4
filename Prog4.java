@@ -9,10 +9,25 @@ import java.sql.*;
 import java.util.*;
 
 public class Prog4 {
+
+    /*
+    Name: getMenuChoice
+
+    Purpose: Captures a user's input to figure out what query to run
+
+    Pre-Conditions: None
+
+    Post-Conditions: The (final) returned value will always be 1-10
+
+    Parameters:
+    scanner (Scanner): Scanner object to capture user's input
+
+    Returns:
+    integer detailing what query a user wants to run.
+     */
     public static int getMenuChoice(Scanner scanner) {
         while (true) {
             System.out.println("""
-                Select a query:
                 Add, Update, or Delete a(n):
                     Member (1), Ski Pass (2), Equipment Inventory Record (3),
                     Equipment Rental Record (4), Lesson Purchase Record (5)
@@ -21,13 +36,13 @@ public class Prog4 {
                 7. Get Ski Pass Usage Details
                 8. Get Open Intermediate Trails
                 9. Query 4 (Custom Query)
-                10. Quit
-                """);
+                10. Quit""");
 
             int choice;
             try {
                 choice = scanner.nextInt();
-                scanner.nextLine();
+                scanner.nextLine(); // We need this for some reason
+
 
                 switch (choice) {
                     case 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 -> {return choice;}
@@ -41,25 +56,76 @@ public class Prog4 {
         }
     }
 
-    public static void Member() {
+    public static void Member(Scanner scanner) {
+        String specifier;
+        while (true) {
+            System.out.println("Would you like to ADD, UPDATE, or DELETE a Member?");
+            specifier = scanner.nextLine().trim().toUpperCase();
+
+            if (specifier.matches("ADD|UPDATE|DELETE"))
+                break;
+            else
+                System.err.println("Invalid query specifier! Please try again.\n");
+
+
+
+        }
 
     }
 
-    public static void SkiPass() {
+    public static void SkiPass(Scanner scanner) {
+        String specifier;
+        while (true) {
+            System.out.println("Would you like to ADD, UPDATE, or DELETE a Ski Pass?");
+            specifier = scanner.nextLine().trim().toUpperCase();
 
+            if (specifier.matches("ADD|UPDATE|DELETE"))
+                break;
+            else
+                System.err.println("Invalid query specifier! Please try again.\n");
+
+
+        }
 
     }
 
-    public static void EquipmentInventoryRecord() {
+    public static void EquipmentInventoryRecord(Scanner scanner) {
+        String specifier;
+        while (true) {
+            System.out.println("Would you like to ADD, UPDATE, or DELETE an Equipment Inventory Record?");
+            specifier = scanner.nextLine().trim().toUpperCase();
 
+            if (specifier.matches("ADD|UPDATE|DELETE"))
+                break;
+            else
+                System.err.println("Invalid query specifier! Please try again.\n");
+        }
     }
 
-    public static void EquipmentRentalRecord() {
+    public static void EquipmentRentalRecord(Scanner scanner) {
+        String specifier;
+        while (true) {
+            System.out.println("Would you like to ADD, UPDATE, or DELETE an Equipment Rental Record?");
+            specifier = scanner.nextLine().trim().toUpperCase();
 
+            if (specifier.matches("ADD|UPDATE|DELETE"))
+                break;
+            else
+                System.err.println("Invalid query specifier! Please try again.\n");
+        }
     }
 
-    public static void LessonPurchaseRecord() {
+    public static void LessonPurchaseRecord(Scanner scanner) {
+        String specifier;
+        while (true) {
+            System.out.println("Would you like to ADD, UPDATE, or DELETE a Lesson Purchase Record?");
+            specifier = scanner.nextLine().trim().toUpperCase();
 
+            if (specifier.matches("ADD|UPDATE|DELETE"))
+                break;
+            else
+                System.err.println("Invalid query specifier! Please try again.\n");
+        }
     }
 
     public static void GetMemberSkiLessonDetails() {
@@ -77,8 +143,6 @@ public class Prog4 {
     public static void CustomQuery() {
 
     }
-
-
 
 
 
@@ -140,23 +204,23 @@ public class Prog4 {
                 //statement = dbconn.createStatement();
                 switch (decision) {
                     case 1:
-                        Member();
+                        Member(scanner);
                         break;
 
                     case 2:
-                        SkiPass();
+                        SkiPass(scanner);
                         break;
 
                     case 3:
-                        EquipmentInventoryRecord();
+                        EquipmentInventoryRecord(scanner);
                         break;
 
                     case 4:
-                        EquipmentRentalRecord();
+                        EquipmentRentalRecord(scanner);
                         break;
 
                     case 5:
-                        LessonPurchaseRecord();
+                        LessonPurchaseRecord(scanner);
                         break;
 
                     case 6:

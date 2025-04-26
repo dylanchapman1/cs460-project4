@@ -7,8 +7,12 @@
 
 import java.sql.*;
 import java.util.*;
+// export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${CLASSPATH}
 
 public class Prog4 {
+    // Will increment each time a new Member is added
+    public static int memberID = 0;
+
 
     /*
     Name: getMenuChoice
@@ -28,9 +32,10 @@ public class Prog4 {
     public static int getMenuChoice(Scanner scanner) {
         while (true) {
             System.out.println("""
+                Select a query!
                 Add, Update, or Delete a(n):
                     Member (1), Ski Pass (2), Equipment Inventory Record (3),
-                    Equipment Rental Record (4), Lesson Purchase Record (5)
+                    Equipment Rental Record (4), Lesson Purchase Record (5),
                 
                 6. Get Member Ski Lesson Details
                 7. Get Ski Pass Usage Details
@@ -56,7 +61,8 @@ public class Prog4 {
         }
     }
 
-    public static void Member(Scanner scanner) {
+    public static void Member(Scanner scanner, Connection dbconn) {
+        String query;
         String specifier;
         while (true) {
             System.out.println("Would you like to ADD, UPDATE, or DELETE a Member?");
@@ -66,14 +72,62 @@ public class Prog4 {
                 break;
             else
                 System.err.println("Invalid query specifier! Please try again.\n");
+        }
+
+        switch (specifier) {
+            case "ADD":
+                System.out.println("""
+                        Please add all necessary fields, and SEPARATE THEM WITH COMMAS
+                        <Name (String)>, <Phone (int)>, <Email (String)>, <DOB (YYYY-MM-DD)>, <Emergency Contact (int)>
+                        """);
+
+                String input  = scanner.nextLine().trim();
+                String[] attributes = input.split(",");
+                for (String attribute : attributes) attribute = attribute.trim();
+
+                query = String.format(
+                        "INSERT INTO dylanchapman.Member VALUES(%d, '%s', %d, '%s', TO_DATE('%s', 'YYYY-MM-DD'), %d)",
+                        memberID,
+                        attributes[0].trim(), // Name
+                        Integer.parseInt(attributes[1].trim()), // Phone
+                        attributes[2].trim(), // Email
+                        attributes[3].trim(), // DOB
+                        Integer.parseInt(attributes[4].trim()) // Emergency Contact
+                );
 
 
+                try {
+                    Statement statement = dbconn.createStatement();
+                    statement.executeQuery(query);
+                    System.out.println("Member added successfully! Your member ID is " + memberID);
+                    memberID++;
+                }
 
+                catch (SQLException e) {
+                    System.err.println("*** SQLException: Could not fetch query results.");
+                    System.err.println("\tMessage:   " + e.getMessage());
+                    System.err.println("\tSQLState:  " + e.getSQLState());
+                    System.err.println("\tErrorCode: " + e.getErrorCode());
+                }
+
+                break;
+
+
+            case "UPDATE":
+                System.out.println("Please enter the MemberID of the member you wish to update:");
+                query = scanner.nextLine().trim();
+                break;
+
+
+            case "DELETE":
+                System.out.println("Please insert the MemberID of the member you wish to delete:");
+                query = scanner.nextLine().trim();
+                break;
         }
 
     }
 
-    public static void SkiPass(Scanner scanner) {
+    public static void SkiPass(Scanner scanner, Connection dbconn) {
         String specifier;
         while (true) {
             System.out.println("Would you like to ADD, UPDATE, or DELETE a Ski Pass?");
@@ -83,13 +137,11 @@ public class Prog4 {
                 break;
             else
                 System.err.println("Invalid query specifier! Please try again.\n");
-
-
         }
 
     }
 
-    public static void EquipmentInventoryRecord(Scanner scanner) {
+    public static void EquipmentInventoryRecord(Scanner scanner, Connection dbconn) {
         String specifier;
         while (true) {
             System.out.println("Would you like to ADD, UPDATE, or DELETE an Equipment Inventory Record?");
@@ -100,9 +152,11 @@ public class Prog4 {
             else
                 System.err.println("Invalid query specifier! Please try again.\n");
         }
+
+
     }
 
-    public static void EquipmentRentalRecord(Scanner scanner) {
+    public static void EquipmentRentalRecord(Scanner scanner, Connection dbconn) {
         String specifier;
         while (true) {
             System.out.println("Would you like to ADD, UPDATE, or DELETE an Equipment Rental Record?");
@@ -113,9 +167,11 @@ public class Prog4 {
             else
                 System.err.println("Invalid query specifier! Please try again.\n");
         }
+
+
     }
 
-    public static void LessonPurchaseRecord(Scanner scanner) {
+    public static void LessonPurchaseRecord(Scanner scanner, Connection dbconn) {
         String specifier;
         while (true) {
             System.out.println("Would you like to ADD, UPDATE, or DELETE a Lesson Purchase Record?");
@@ -126,6 +182,8 @@ public class Prog4 {
             else
                 System.err.println("Invalid query specifier! Please try again.\n");
         }
+
+
     }
 
     public static void GetMemberSkiLessonDetails() {
@@ -150,7 +208,7 @@ public class Prog4 {
 
 
     public static void main(String[] args) {
-        /*final String oracleURL = "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
+        final String oracleURL = "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
 
         String username = null; // Oracle DBMS username & password
         String password = null;
@@ -178,7 +236,7 @@ public class Prog4 {
         }
 
         // Make & return a DB connection to user's Oracle database
-        Connection dbconn = null;
+        java.sql.Connection dbconn = null;
 
         try {
             dbconn = DriverManager.getConnection(oracleURL,username,password);
@@ -201,26 +259,26 @@ public class Prog4 {
             int decision = getMenuChoice(scanner);
 
             while (decision != 10) {
-                //statement = dbconn.createStatement();
+                statement = dbconn.createStatement();
                 switch (decision) {
                     case 1:
-                        Member(scanner);
+                        Member(scanner, dbconn);
                         break;
 
                     case 2:
-                        SkiPass(scanner);
+                        SkiPass(scanner, dbconn);
                         break;
 
                     case 3:
-                        EquipmentInventoryRecord(scanner);
+                        EquipmentInventoryRecord(scanner, dbconn);
                         break;
 
                     case 4:
-                        EquipmentRentalRecord(scanner);
+                        EquipmentRentalRecord(scanner, dbconn);
                         break;
 
                     case 5:
-                        LessonPurchaseRecord(scanner);
+                        LessonPurchaseRecord(scanner, dbconn);
                         break;
 
                     case 6:
@@ -239,18 +297,17 @@ public class Prog4 {
                         CustomQuery();
                         break;
                 }
-                //statement.close();
+                statement.close();
                 decision = getMenuChoice(scanner);
             }
         }
-        catch (Exception e) {System.out.println(e.getMessage());}
-        /*catch (SQLException e) {
+        catch (SQLException e) {
             System.err.println("*** SQLException: Could not fetch query results.");
             System.err.println("\tMessage:   " + e.getMessage());
             System.err.println("\tSQLState:  " + e.getSQLState());
             System.err.println("\tErrorCode: " + e.getErrorCode());
             System.exit(-1);
-        } */
+        }
 
 
     }

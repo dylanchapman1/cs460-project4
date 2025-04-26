@@ -10,9 +10,6 @@ import java.util.*;
 // export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${CLASSPATH}
 
 public class Prog4 {
-
-
-
     // Will increment each time a new Member is added
     public static int memberID = 0;
 
@@ -64,7 +61,38 @@ public class Prog4 {
     }
 
     public static void addMember(Scanner scanner, Connection dbconn) {
+        String query;
+        System.out.println("""
+                        Please add all necessary fields, and SEPARATE THEM WITH COMMAS
+                        <Name (String)>, <Phone (int)>, <Email (String)>, <DOB (YYYY-MM-DD)>, <Emergency Contact (int)>
+                        """);
 
+        String input  = scanner.nextLine().trim();
+        String[] attributes = input.split(",");
+
+        query = String.format(
+                "INSERT INTO dylanchapman.Member VALUES(%d, '%s', %d, '%s', TO_DATE('%s', 'YYYY-MM-DD'), %d)",
+                memberID,
+                attributes[0].trim(), // Name
+                Integer.parseInt(attributes[1].trim()), // Phone
+                attributes[2].trim(), // Email
+                attributes[3].trim(), // DOB
+                Integer.parseInt(attributes[4].trim()) // Emergency Contact
+        );
+
+        try {
+            Statement statement = dbconn.createStatement();
+            statement.executeQuery(query);
+            System.out.println("Member added successfully! Your member ID is " + memberID);
+            memberID++;
+        }
+
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
     }
 
     public static void updateMember(Scanner scanner, Connection dbconn) {

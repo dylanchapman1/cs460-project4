@@ -6,6 +6,8 @@
  */
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 // export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${CLASSPATH}
 
@@ -69,6 +71,31 @@ public class Prog4 {
             if (answer != null) {
                 while (answer.next())
                     IDs.add(answer.getInt("MEMBERID"));
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+            System.exit(-1);
+
+        }
+
+        return IDs;
+    }
+
+    public static ArrayList<Integer> getPassIDs(Connection dbconn) {
+        ArrayList<Integer> IDs = new ArrayList<>();
+        String query = "SELECT PASSID FROM dylanchapman.SKIPASS";
+
+        try {
+            Statement statement = dbconn.createStatement();
+            ResultSet answer = statement.executeQuery(query);
+
+            if (answer != null) {
+                while (answer.next())
+                    IDs.add(answer.getInt("PASSID"));
             }
         }
         catch (SQLException e) {
@@ -222,7 +249,64 @@ public class Prog4 {
     }
 
     public static void deleteSkiPass(Scanner scanner, Connection dbconn) {
+        System.out.println("Please enter the PassID of the user you wish to delete a Ski Pass for:");
+        int passID = scanner.nextInt();
 
+        System.out.println("Please enter the MemberID of the user you wish to delete a Ski Pass for");
+        int memberID = scanner.nextInt();
+        scanner.nextLine(); // I'm pretty sure we need this
+
+        if (!getMemberIDs(dbconn).contains(memberID) || !getPassIDs(dbconn).contains(passID)) {
+            System.out.println("PassID/MemberID does not exist!\n");
+            return;
+        }
+
+        String query = String.format("SELECT REMAININGUSES, EXPIRATIONDATE FROM dylanchapman.SkiPass WHERE PASSID = %d AND MEMBERID = %d", passID, memberID);
+        ResultSet answer = null;
+
+        try {
+            Statement statement = dbconn.createStatement();
+            answer = statement.executeQuery(query);
+
+            if (answer != null) {
+                while (answer.next()) {
+                    int remaining = Integer.parseInt(answer.getString("REMAININGUSES"));
+                    String expired = answer.getString("EXPIRATIONDATE").split(" ")[0];
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    LocalDate currentDate = LocalDate.now();
+                    LocalDate expirationDate = LocalDate.parse(expired, formatter);
+
+                    if (currentDate.isAfter(expirationDate) && remaining == 0) {
+                        String deleteQuery = String.format("UPDATE dylanchapman.SkiPass SET ACTIVE = %d, WHERE PASSID = %d AND MEMBERID = %d", 0, passID, memberID);
+
+                        try {
+                            Statement deleteStatement = dbconn.createStatement();
+                            deleteStatement.executeUpdate(deleteQuery);
+                            System.out.printf("Ski Pass, with PassID %d, deleted for member ID %d!\n\n", passID, memberID);
+                        }
+
+                        catch (SQLException e) {
+                            System.err.println("*** SQLException: Could not fetch query results.");
+                            System.err.println("\tMessage:   " + e.getMessage());
+                            System.err.println("\tSQLState:  " + e.getSQLState());
+                            System.err.println("\tErrorCode: " + e.getErrorCode());
+                        }
+                    }
+                    else {
+                        System.out.println("Your ski pass has either not yet expired, or still has remaining uses!");
+                        return;
+                    }
+                }
+            }
+        }
+
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
     }
 
     public static void addEquipmentInventory(Scanner scanner, Connection dbconn) {

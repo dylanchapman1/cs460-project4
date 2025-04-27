@@ -10,8 +10,6 @@ import java.util.*;
 // export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${CLASSPATH}
 
 public class Prog4 {
-    // Will increment each time a new Member is added
-    public static int memberID = 0;
 
     /*
     Name: getMenuChoice
@@ -50,7 +48,7 @@ public class Prog4 {
 
                 switch (choice) {
                     case 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 -> {return choice;}
-                    default -> System.out.println("Please choose a number 1-10!");
+                    default -> System.out.println("Please choose a number 1-10!\n");
                 }
             }
             catch (InputMismatchException e) {
@@ -58,6 +56,31 @@ public class Prog4 {
                 scanner.nextLine();
             }
         }
+    }
+
+    public static ArrayList<Integer> getMemberIDs(Connection dbconn) {
+        ArrayList<Integer> IDs = new ArrayList<>();
+        String query = "SELECT MEMBERID FROM dylanchapman.MEMBER";
+
+        try {
+            Statement statement = dbconn.createStatement();
+            ResultSet answer = statement.executeQuery(query);
+
+            if (answer != null) {
+                while (answer.next())
+                    IDs.add(answer.getInt("MEMBERID"));
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+            System.exit(-1);
+
+        }
+
+        return IDs;
     }
 
     public static void addMember(Scanner scanner, Connection dbconn) {
@@ -69,22 +92,22 @@ public class Prog4 {
 
         String input  = scanner.nextLine().trim();
         String[] attributes = input.split(",");
+        int currentID = Collections.max(getMemberIDs(dbconn)) + 1;
 
         query = String.format(
                 "INSERT INTO dylanchapman.Member VALUES(%d, '%s', %d, '%s', TO_DATE('%s', 'YYYY-MM-DD'), %d)",
-                memberID,
+                currentID,
                 attributes[0].trim(), // Name
-                Integer.parseInt(attributes[1].trim()), // Phone
+                Long.parseLong(attributes[1].trim()), // Phone
                 attributes[2].trim(), // Email
                 attributes[3].trim(), // DOB
-                Integer.parseInt(attributes[4].trim()) // Emergency Contact
+                Long.parseLong(attributes[4].trim()) // Emergency Contact
         );
 
         try {
             Statement statement = dbconn.createStatement();
-            statement.executeQuery(query);
-            System.out.println("Member added successfully! Your member ID is " + memberID);
-            memberID++;
+            statement.executeUpdate(query);
+            System.out.println("Member added successfully! Your member ID is " + currentID);
         }
 
         catch (SQLException e) {
@@ -96,7 +119,44 @@ public class Prog4 {
     }
 
     public static void updateMember(Scanner scanner, Connection dbconn) {
+        System.out.println("Please enter the MemberID of the user you wish to update:");
+        int memberID = scanner.nextInt();
+        scanner.nextLine(); // I'm pretty sure we need this
 
+        if (!getMemberIDs(dbconn).contains(memberID)) {
+            System.out.println("Member ID does not exist!\n");
+            return;
+        }
+
+        String query;
+        System.out.println("""
+                        Please reenter all necessary fields, and SEPARATE THEM WITH COMMAS
+                        <Phone (int)>, <Email (String)>, <Emergency Contact (int)>
+                        """);
+
+        String input  = scanner.nextLine().trim();
+        String[] attributes = input.split(",");
+
+        query = String.format(
+                "UPDATE dylanchapman.Member SET PHONENO = %d, EMAIL = '%s', EMERGENCYCONTACTNO = %d WHERE MEMBERID = %d",
+                Long.parseLong(attributes[0]),
+                attributes[1].trim(),
+                Long.parseLong(attributes[2].trim()),
+                memberID
+        );
+
+        try {
+            Statement statement = dbconn.createStatement();
+            statement.executeUpdate(query);
+            System.out.printf("Your information has been updated successfully! Your member ID is %d\n\n", memberID);
+        }
+
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
     }
 
     public static void deleteMember(Scanner scanner, Connection dbconn) {
@@ -104,6 +164,39 @@ public class Prog4 {
     }
 
     public static void addSkiPass(Scanner scanner, Connection dbconn) {
+        System.out.println("Please enter the MemberID of the user you wish to buy a Ski Pass for:");
+        int memberID = scanner.nextInt();
+        scanner.nextLine(); // I'm pretty sure we need this
+
+        if (!getMemberIDs(dbconn).contains(memberID)) {
+            System.out.println("Member ID does not exist!\n");
+            return;
+        }
+
+        int uses = (int) (Math.random() * 21) + 20; // Random # 20-40
+
+        String query = String.format(
+                "INSERT INTO dylanchapman.SkiPass VALUES(%d, %d, %d, %d, '%s', %d)",
+                memberID * 2, // PassID
+                memberID,
+                uses, // Total Uses
+                uses, // Remaining Uses
+                "2024-12-31", // Expiration
+                200 // Price
+        );
+
+        try {
+            Statement statement = dbconn.createStatement();
+            statement.executeUpdate(query);
+            System.out.printf("Ski Pass purchased for member ID %s\n\n!", memberID);
+        }
+
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
 
     }
 
@@ -168,10 +261,6 @@ public class Prog4 {
     }
 
 
-
-
-
-
     public static void main(String[] args) {
         final String oracleURL = "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
 
@@ -193,7 +282,6 @@ public class Prog4 {
         // Load (Oracle) JDBC driver by initializing its base class, 'oracle.jdbc.OracleDriver'
         try {Class.forName("oracle.jdbc.OracleDriver");}
         catch (ClassNotFoundException e) {
-
             System.err.println("""
                     *** ClassNotFoundException: Error loading Oracle JDBC driver.
                     \tPerhaps the driver is not on the Classpath?""");
@@ -201,11 +289,9 @@ public class Prog4 {
         }
 
         // Make & return a DB connection to user's Oracle database
-        java.sql.Connection dbconn = null;
+        Connection dbconn = null;
 
-        try {
-            dbconn = DriverManager.getConnection(oracleURL,username,password);
-        }
+        try {dbconn = DriverManager.getConnection(oracleURL, username, password);}
         catch (SQLException e) {
             System.err.println("*** SQLException: Could not open JDBC connection.");
             System.err.println("\tMessage:   " + e.getMessage());
@@ -213,7 +299,6 @@ public class Prog4 {
             System.err.println("\tErrorCode: " + e.getErrorCode());
             System.exit(-1);
         }
-
 
         // Now that we've done the "pre-processing," let's get started with the queries!
         // Queries will be built by these String objects (multiple times) */

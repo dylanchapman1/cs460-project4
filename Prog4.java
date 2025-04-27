@@ -107,7 +107,7 @@ public class Prog4 {
         try {
             Statement statement = dbconn.createStatement();
             statement.executeUpdate(query);
-            System.out.println("Member added successfully! Your member ID is " + currentID);
+            System.out.printf("Member added successfully! Your member ID is %s\n\n", currentID);
         }
 
         catch (SQLException e) {
@@ -193,19 +193,19 @@ public class Prog4 {
         // Will be 1,2,3, or 4
         String selectedPass = scanner.nextLine().trim();
         String query = String.format(
-                "INSERT INTO dylanchapman.SkiPass VALUES(%d, %d, %d, %d, '%s', %d)",
-                memberID * 2, // PassID
+                "INSERT INTO dylanchapman.SkiPass VALUES(%d, %d, %d, %d, TO_DATE('2024-12-31', 'YYYY-MM-DD'), %d)",
+                memberID * 2,
                 memberID,
-                skiPassMap.get(selectedPass)[0], // Total Uses
-                skiPassMap.get(selectedPass)[0], // Remaining Uses
-                "2024-12-31", // Expiration
-                skiPassMap.get(selectedPass)[1] // Price
+                skiPassMap.get(selectedPass)[0],
+                skiPassMap.get(selectedPass)[0],
+                skiPassMap.get(selectedPass)[1]
         );
+
 
         try {
             Statement statement = dbconn.createStatement();
             statement.executeUpdate(query);
-            System.out.printf("Ski Pass purchased for member ID %s\n\n!", memberID);
+            System.out.printf("Ski Pass purchased for member ID %s!\n\n", memberID);
         }
 
         catch (SQLException e) {

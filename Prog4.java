@@ -175,16 +175,31 @@ public class Prog4 {
             return;
         }
 
-        int uses = (int) (Math.random() * 21) + 20; // Random # 20-40
+        System.out.println("""
+                Which pass would you like to buy (enter the corresponding integer):
+                    1. 1-day | 10 uses | $75
+                    2. 2-day | 25 uses | $140
+                    3. 4-day | 65 uses | $250
+                    4. Season Pass | 1000 Uses | $750
+                """);
 
+        Map<String, Integer[]> skiPassMap = Map.of(
+                "1", new Integer[]{10, 75},
+                "2", new Integer[]{25, 140},
+                "3", new Integer[]{65, 250},
+                "4", new Integer[]{1000, 750}
+        );
+
+        // Will be 1,2,3, or 4
+        String selectedPass = scanner.nextLine().trim();
         String query = String.format(
                 "INSERT INTO dylanchapman.SkiPass VALUES(%d, %d, %d, %d, '%s', %d)",
                 memberID * 2, // PassID
                 memberID,
-                uses, // Total Uses
-                uses, // Remaining Uses
+                skiPassMap.get(selectedPass)[0], // Total Uses
+                skiPassMap.get(selectedPass)[0], // Remaining Uses
                 "2024-12-31", // Expiration
-                200 // Price
+                skiPassMap.get(selectedPass)[1] // Price
         );
 
         try {

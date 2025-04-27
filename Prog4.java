@@ -160,7 +160,9 @@ public class Prog4 {
     }
 
     public static void deleteMember(Scanner scanner, Connection dbconn) {
-
+        System.out.println("Please enter the MemberID of the user you wish to update:");
+        int memberID = scanner.nextInt();
+        scanner.nextLine(); // I'm pretty sure we need this
     }
 
     public static void addSkiPass(Scanner scanner, Connection dbconn) {

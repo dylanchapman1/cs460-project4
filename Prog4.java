@@ -476,7 +476,7 @@ public class Prog4 {
     public static void addEquipmentRental(Scanner scanner, Connection dbconn) {
 
     }
-
+    
     public static void updateEquipmentRental(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the RentalID of the record you wish to update:");
         int rentalID = scanner.nextInt();
@@ -556,7 +556,7 @@ public class Prog4 {
             PreparedStatement prep = dbconn.prepareStatement(sql);
             i = 0;
             while(i < vals.length) {
-                if(i == 3) {
+                if(i == 2) {
                     try {
                         java.sql.Date sqlDate = java.sql.Date.valueOf(vals[i]); //  YYYY-MM-DD
                         prep.setDate(i + 1, sqlDate);

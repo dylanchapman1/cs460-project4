@@ -113,13 +113,6 @@ CREATE TABLE Property(
     PRIMARY KEY (propertyID)
 );
 
-CREATE TABLE Facility(
-    propertyID NUMBER(10),
-    name VARCHAR2(50),
-    income NUMBER(10),
-    PRIMARY KEY (propertyID, name)
-);
-
 INSERT INTO Member VALUES (3010, 'Alice Johnson', 1234567890, 'alice@example.com', TO_DATE('1990-06-15', 'YYYY-MM-DD'), 9876543210);
 INSERT INTO Member VALUES (3011, 'Bob Smith', 1987654321, 'bmith@example.com', TO_DATE('1985-03-22', 'YYYY-MM-DD'), 8765432190);
 INSERT INTO Member VALUES (3012, 'Carlos Ruiz', 1212121212, 'carlosruiz121@example.com', TO_DATE('2000-12-01', 'YYYY-MM-DD'), 9090909090);

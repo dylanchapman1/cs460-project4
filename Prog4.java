@@ -275,14 +275,14 @@ public class Prog4 {
 
         System.out.println("Please enter the MemberID of the user you wish to update a skipass for:");
         int memberID = scanner.nextInt();
-
+        scanner.nextLine();
         if(!getMemberIDs(dbconn).contains(memberID) || !getPassIDs(dbconn).contains(passID)) {
             System.out.println("PassID/MemberID foes not exist!\n");
             return;
         }
 
         ArrayList<String> cols = new ArrayList<String>();
-        try(ResultSet answer = dbconn.getMetaData().getColumns(null, null, "SKIPASS", null)) {
+        try(ResultSet answer = dbconn.getMetaData().getColumns(null, "DYLANCHAPMAN", "SKIPASS", null)) {
             while(answer.next()) {
                 cols.add(answer.getString("COLUMN_NAME"));
             }
@@ -291,13 +291,12 @@ public class Prog4 {
             System.out.println("sql error");
             return;
         }
-
         cols.remove("PASSID");
         cols.remove("MEMBERID");
 
         String sql = "update dylanchapman.SKIPASS SET ";
         String[] vals = new String[cols.size()];
-        
+
         int i = 0;
         while(i < cols.size()) {
             String col = cols.get(i);
@@ -310,20 +309,33 @@ public class Prog4 {
 
             }
             i++;
-        }  
+        }
 
         sql += " where passid = ?  and memberid = ?";
 
         try {
             PreparedStatement prep = dbconn.prepareStatement(sql);
             i = 0;
+            System.out.println(i + " " + vals.length);
             while(i < vals.length) {
-                prep.setString(i+1, vals[i]);
-                i++;
+                if (i == 2) {
+                        try {
+                                java.sql.Date sqlDate = java.sql.Date.valueOf(vals[i]); // YYYY-MM-DD
+                                prep.setDate(i + 1, sqlDate);
+                                i++;
+                        }
+                        catch(IllegalArgumentException e) {
+                                System.out.println("Please use YYYY-MM-DD.");
+                                return;
+                        }
+                }
+                else{
+                        prep.setString(i+1, vals[i]);
+                        i++;
+                }
             }
             prep.setInt(i+1, passID);
             prep.setInt(i+2, memberID);
-
             int count = prep.executeUpdate();
             if(count > 0) {
                 System.out.println("Ski pass updated");
@@ -333,10 +345,13 @@ public class Prog4 {
             }
         }
         catch(SQLException e) {
-            System.out.println("error");
+            System.out.println("error: "+ e.getMessage());
+                System.out.println(e.getSQLState());
+                System.out.println(e.getErrorCode());
         }
     }
 
+    
     public static void deleteSkiPass(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the PassID of the user you wish to delete a Ski Pass for:");
         int passID = scanner.nextInt();

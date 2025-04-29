@@ -488,7 +488,7 @@ public class Prog4 {
         }
     
         ArrayList<String> cols = new ArrayList<>();
-        try(ResultSet answer = dbconn.getMetaData().getColumns(null, "DYLANCHAPMAN", "EQUIPMENTRENTALRECORD", null)) {
+        try(ResultSet answer = dbconn.getMetaData().getColumns(null, "DYLANCHAPMAN", "EQUIPMENTRENTAL", null)) {
             while(answer.next()) {
                 cols.add(answer.getString("COLUMN_NAME"));
             }
@@ -500,7 +500,7 @@ public class Prog4 {
     
         cols.remove("RENTALID");
     
-        String sql = "UPDATE dylanchapman.EQUIPMENTRENTALRECORD SET ";
+        String sql = "UPDATE dylanchapman.EQUIPMENTRENTAL SET ";
         String[] vals = new String[cols.size()];
     
         int i = 0;
@@ -562,7 +562,7 @@ public class Prog4 {
                         prep.setDate(i + 1, sqlDate);
                     } 
                     catch(IllegalArgumentException e) {
-                        System.out.println("se YYYY-MM-DD format.");
+                        System.out.println("YYYY-MM-DD format.");
                         return;
                     }
                 } 

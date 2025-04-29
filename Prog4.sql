@@ -10,7 +10,7 @@ CREATE TABLE Member (
 
 CREATE TABLE SkiPass (
     passID NUMBER(10),
-    memberID NUMBER(10) FOREIGN KEY REFERENCES Member(MEMBERID),
+    memberID NUMBER(10),
     totalUses NUMBER(4),
     remainingUses NUMBER(4), -- 10, 25, 65, 1000
     expirationDate DATE,
@@ -38,8 +38,8 @@ CREATE TABLE Equipment(
 
 CREATE TABLE EquipmentRental (
     rentalID NUMBER(38),
-    memberID NUMBER(38) FOREIGN KEY REFERENCES Member(memberID),
-    passID NUMBER(38) FOREIGN KEY REFERENCES SkiPass(passID),
+    memberID NUMBER(38),
+    passID NUMBER(38),
     rentalDate DATE,
     returnStatus NUMBER(38), -- 0 = unused | 1 = in use
     PRIMARY KEY (rentalID)
@@ -111,13 +111,6 @@ CREATE TABLE Property(
     type VARCHAR2(50),
     income NUMBER(10),
     PRIMARY KEY (propertyID)
-);
-
-CREATE TABLE Facility(
-    propertyID NUMBER(10),
-    name VARCHAR2(50),
-    income NUMBER(10),
-    PRIMARY KEY (propertyID, name)
 );
 
 INSERT INTO Member VALUES (3010, 'Alice Johnson', 1234567890, 'alice@example.com', TO_DATE('1990-06-15', 'YYYY-MM-DD'), 9876543210);

@@ -270,7 +270,71 @@ public class Prog4 {
     }
 
     public static void updateSkiPass(Scanner scanner, Connection dbconn) {
+        System.out.println("Please enter the PassID of the user you wish to update a Ski Pass for:");
+        int passID = scanner.nextInt();
 
+        System.out.println("Please enter the MemberID of the user you wish to update a skipass for:");
+        int memberID = scanner.nextInt();
+
+        if(!getMemberIDs(dbconn).contains(memberID) || !getPassIDs(dbconn).contains(passID)) {
+            System.out.println("PassID/MemberID foes not exist!\n");
+            return;
+        }
+
+        ArrayList<String> cols = new ArrayList<String>();
+        try(ResultSet answer = dbconn.getMetaData().getColumns(null, null, "SKIPASS", null)) {
+            while(answer.next()) {
+                cols.add(answer.getString("COLUMN_NAME"));
+            }
+        }
+        catch(SQLException e) {
+            System.out.println("sql error");
+            return;
+        }
+
+        cols.remove("PASSID");
+        cols.remove("MEMBERID");
+
+        String sql = "update dylanchapman.SKIPASS SET ";
+        String[] vals = new String[cols.size()];
+        
+        int i = 0;
+        while(i < cols.size()) {
+            String col = cols.get(i);
+            System.out.println("Enter a new value for " + col + ": ");
+            vals[i] = scanner.nextLine();
+
+            sql += col + " = ?";
+            if(i < cols.size()-1) {
+                sql += ", ";
+
+            }
+            i++;
+        }  
+
+        sql += " where passid = ?  and memberid = ?";
+
+        try {
+            PreparedStatement prep = dbconn.prepareStatement(sql);
+            i = 0;
+            while(i < vals.length) {
+                prep.setString(i+1, vals[i]);
+                i++;
+            }
+            prep.setInt(i+1, passID);
+            prep.setInt(i+2, memberID);
+
+            int count = prep.executeUpdate();
+            if(count > 0) {
+                System.out.println("Ski pass updated");
+            }
+            else {
+                System.out.println("No record updated");
+            }
+        }
+        catch(SQLException e) {
+            System.out.println("error");
+        }
     }
 
     public static void deleteSkiPass(Scanner scanner, Connection dbconn) {

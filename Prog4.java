@@ -110,6 +110,29 @@ public class Prog4 {
         return IDs;
     }
 
+    public static ArrayList<Integer> getEquipmentIDs(Connection dbconn) {
+        ArrayList<Integer> IDs = new ArrayList<>();
+        String query = "SELECT EQUIPMENTID FROM dylanchapman.EQUIPMENT";
+
+        try {
+            Statement statement = dbconn.createStatement();
+            ResultSet answer = statement.executeQuery(query);
+
+            if (answer != null) {
+                while (answer.next())
+                    IDs.add(answer.getInt("EQUIPMENTID"));
+            }
+        } catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+            System.exit(-1);
+        }
+
+        return IDs;
+    }
+
     public static void addMember(Scanner scanner, Connection dbconn) {
         String query;
         System.out.println("""
@@ -190,6 +213,8 @@ public class Prog4 {
         System.out.println("Please enter the MemberID of the user you wish to update:");
         int memberID = scanner.nextInt();
         scanner.nextLine(); // I'm pretty sure we need this
+
+
     }
 
     public static void addSkiPass(Scanner scanner, Connection dbconn) {
@@ -310,7 +335,35 @@ public class Prog4 {
     }
 
     public static void addEquipmentInventory(Scanner scanner, Connection dbconn) {
+        System.out.println("""
+            Please add all necessary fields, and SEPARATE THEM WITH COMMAS
+            <Type (String: boots, poles, snowboard, skis, gear)>, <Size (XS, S, M, L, XL)>, <Status (String: available, rented, retired)>
+            """);
 
+        String input = scanner.nextLine().trim();
+        String[] attributes = input.split(",");
+
+        int currentID = Collections.max(getEquipmentIDs(dbconn)) + 1;
+
+        String query = String.format(
+                "INSERT INTO dylanchapman.EQUIPMENT VALUES(%d, '%s', '%s', '%s')",
+                currentID,
+                attributes[0].trim().toLowerCase(), // Type
+                attributes[1].trim().toUpperCase(), // Size
+                attributes[2].trim()  // Status
+        );
+
+        try {
+            Statement statement = dbconn.createStatement();
+            statement.executeUpdate(query);
+            System.out.printf("Equipment added successfully! Equipment ID is %d\n\n", currentID);
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not add equipment.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
     }
 
     public static void updateEquipmentInventory(Scanner scanner, Connection dbconn) {
@@ -345,8 +398,58 @@ public class Prog4 {
 
     }
 
-    public static void GetMemberSkiLessonDetails() {
+    public static void GetMemberSkiLessonDetails(Scanner scanner, Connection dbconn) {
+        System.out.println("Enter a memberID:");
+        int memberID = scanner.nextInt();
+        scanner.nextLine(); // I'm pretty sure we need this
 
+        if (!getMemberIDs(dbconn).contains(memberID)) {
+            System.out.println("Member ID does not exist!\n");
+            return;
+        }
+
+
+        String query = String.format("""
+                SELECT
+                    LessonPurchase.lessonID,
+                    LessonPurchase.remainingUses,
+                    Employee.name,
+                    Lesson.startTime
+                FROM andrewhicks.LessonPurchase
+                
+                JOIN Lesson ON LessonPurchase.lessonID = Lesson.lessonID
+                JOIN Employee ON Lesson.instructorID = Employee.employeeID
+                WHERE LessonPurchase.memberID = %d
+                ORDER BY Lesson.startTime;
+                """, memberID);
+
+        Statement statement;
+        ResultSet answer;
+
+        try {
+            statement = dbconn.createStatement();
+            answer = statement.executeQuery(query);
+
+            if (answer != null) {
+                ResultSetMetaData answerMetaData = answer.getMetaData();
+
+                for (int i = 1; i <= answerMetaData.getColumnCount(); i++)
+                    System.out.print(answerMetaData.getColumnName(i) + "\t");
+
+                System.out.println();
+
+                while (answer.next()) {
+                    System.out.println(answer.getString("lessonID") + "\t" + answer.getInt("remainingUses") + "\t" + answer.getString("name") + "\t" + answer.getString("startTime") + "\t" + answer.getString("endTime"));
+                }
+            }
+
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not add equipment.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
     }
 
     public static void GetSkiPassUsageDetails() {
@@ -402,7 +505,7 @@ public class Prog4 {
         }
 
         // Now that we've done the "pre-processing," let's get started with the queries!
-        // Queries will be built by these String objects (multiple times) */
+        // Queries will be built by these String objects (multiple times)
         Scanner scanner = new Scanner(System.in);
         Statement statement;
 
@@ -529,7 +632,7 @@ public class Prog4 {
                         }
                     }
 
-                    case 6 -> GetMemberSkiLessonDetails();
+                    case 6 -> GetMemberSkiLessonDetails(scanner, dbconn);
                     case 7 -> GetSkiPassUsageDetails();
                     case 8 -> GetOpenIntermediateTrails();
                     case 9 -> CustomQuery();

@@ -85,6 +85,26 @@ public class Prog4 {
         return IDs;
     }
 
+    public static ArrayList<Integer> getRentalIDs(Connection dbconn) {
+        ArrayList<Integer> IDs = new ArrayList<>();
+        String query = "SELECT RENTALID FROM dylanchapman.EQUIPMENTRENTALRECORD";
+    
+        try {
+            Statement statement = dbconn.createStatement();
+            ResultSet answer = statement.executeQuery(query);
+    
+            if(answer != null) {
+                while(answer.next())
+                    IDs.add(answer.getInt("RENTALID"));
+            }
+        }
+        catch(SQLException e) {
+            System.err.println("error: " + e.getMessage());
+        }
+    
+        return IDs;
+    }    
+
     public static ArrayList<Integer> getPassIDs(Connection dbconn) {
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT PASSID FROM dylanchapman.SKIPASS";
@@ -458,8 +478,114 @@ public class Prog4 {
     }
 
     public static void updateEquipmentRental(Scanner scanner, Connection dbconn) {
-
+        System.out.println("Please enter the RentalID of the record you wish to update:");
+        int rentalID = scanner.nextInt();
+        scanner.nextLine();
+    
+        if (!getRentalIDs(dbconn).contains(rentalID)) {
+            System.out.println("RentalID does not exist!\n");
+            return;
+        }
+    
+        ArrayList<String> cols = new ArrayList<>();
+        try(ResultSet answer = dbconn.getMetaData().getColumns(null, "DYLANCHAPMAN", "EQUIPMENTRENTALRECORD", null)) {
+            while(answer.next()) {
+                cols.add(answer.getString("COLUMN_NAME"));
+            }
+        }
+        catch(SQLException e) {
+            System.out.println("SQL error while reading column metadata.");
+            return;
+        }
+    
+        cols.remove("RENTALID");
+    
+        String sql = "UPDATE dylanchapman.EQUIPMENTRENTALRECORD SET ";
+        String[] vals = new String[cols.size()];
+    
+        int i = 0;
+        while(i < cols.size()) {
+            String col = cols.get(i);
+            String input;
+    
+            while(true) {
+                System.out.println("Enter a new value for " + col + ": ");
+                input = scanner.nextLine();
+    
+                if(col.equalsIgnoreCase("MEMBERID")) {
+                    try {
+                        int memId = Integer.parseInt(input);
+                        if(!getMemberIDs(dbconn).contains(memId)) {
+                            System.out.println("That MEMBERID does not exist. Try again.");
+                            continue;
+                        }
+                    }
+                    catch(NumberFormatException e) {
+                        System.out.println("Please enter a valid MEMBERID.");
+                        continue;
+                    }
+                }
+    
+                if(col.equalsIgnoreCase("PASSID")) {
+                    try {
+                        int passId = Integer.parseInt(input);
+                        if(!getPassIDs(dbconn).contains(passId)) {
+                            System.out.println("That PASSID does not exist. Try again.");
+                            continue;
+                        }
+                    }
+                    catch(NumberFormatException e) {
+                        System.out.println("Please enter a valid PASSID.");
+                        continue;
+                    }
+                }
+                break;
+            }
+    
+            vals[i] = input;
+            sql += col + " = ?";
+            if(i < cols.size() - 1) {
+                sql += ", ";
+            }
+            i++;
+        }
+    
+        sql += " WHERE RENTALID = ?";
+    
+        try {
+            PreparedStatement prep = dbconn.prepareStatement(sql);
+            i = 0;
+            while(i < vals.length) {
+                if(i == 3) {
+                    try {
+                        java.sql.Date sqlDate = java.sql.Date.valueOf(vals[i]); //  YYYY-MM-DD
+                        prep.setDate(i + 1, sqlDate);
+                    } 
+                    catch(IllegalArgumentException e) {
+                        System.out.println("se YYYY-MM-DD format.");
+                        return;
+                    }
+                } 
+                else {
+                    prep.setString(i + 1, vals[i]);
+                }
+                i++;
+            }
+    
+            prep.setInt(i + 1, rentalID);
+    
+            int count = prep.executeUpdate();
+            if(count > 0) {
+                System.out.println("record updated");
+            } 
+            else {
+                System.out.println("no record found");
+            }
+        }
+        catch (SQLException e) {
+            System.out.println("SQL error: " + e.getMessage());}
     }
+    
 
     public static void deleteEquipmentRental(Scanner scanner, Connection dbconn) {
 

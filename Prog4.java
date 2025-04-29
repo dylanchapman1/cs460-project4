@@ -87,7 +87,7 @@ public class Prog4 {
 
     public static ArrayList<Integer> getRentalIDs(Connection dbconn) {
         ArrayList<Integer> IDs = new ArrayList<>();
-        String query = "SELECT RENTALID FROM dylanchapman.EQUIPMENTRENTALRECORD";
+        String query = "SELECT RENTALID FROM dylanchapman.EQUIPMENTRENTAL";
     
         try {
             Statement statement = dbconn.createStatement();

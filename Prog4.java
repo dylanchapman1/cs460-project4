@@ -632,6 +632,8 @@ public class Prog4 {
                         }
                     }
 
+                    // test
+
                     case 6 -> GetMemberSkiLessonDetails(scanner, dbconn);
                     case 7 -> GetSkiPassUsageDetails();
                     case 8 -> GetOpenIntermediateTrails();

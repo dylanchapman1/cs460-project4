@@ -408,39 +408,34 @@ public class Prog4 {
             return;
         }
 
+//        String query = String.format("""
+//                SELECT LessonPurchase.lessonID as "lessonID", LessonPurchase.remainingUses as "Remaining Uses", Employee.name as "Instructor Name", startTime as "Start Time"
+//                FROM dylanchapman.LessonPurchase
+//                JOIN dylanchapman.Lesson ON LessonPurchase.lessonID = Lesson.lessonID
+//                JOIN dylanchapman.Employee ON Lesson.instructorID = Employee.employeeID
+//                WHERE LessonPurchase.memberID = %d""", memberID);
 
-        String query = String.format("""
-                SELECT
-                    LessonPurchase.lessonID,
-                    LessonPurchase.remainingUses,
-                    Employee.name,
-                    Lesson.startTime
-                FROM andrewhicks.LessonPurchase
-                
-                JOIN Lesson ON LessonPurchase.lessonID = Lesson.lessonID
-                JOIN Employee ON Lesson.instructorID = Employee.employeeID
-                WHERE LessonPurchase.memberID = %d
-                ORDER BY Lesson.startTime;
-                """, memberID);
+        String query = "SELECT LessonPurchase.lessonID, LessonPurchase.remainingUses as \"Remaining Uses\", Employee.name as \"Instructor Name\", startTime as \"Start Time\" FROM dylanchapman.LessonPurchase JOIN dylanchapman.Lesson ON LessonPurchase.lessonID = Lesson.lessonID JOIN dylanchapman.Employee ON Lesson.instructorID = Employee.employeeID WHERE LessonPurchase.memberID = " + memberID;
+
 
         Statement statement;
         ResultSet answer;
-
         try {
             statement = dbconn.createStatement();
             answer = statement.executeQuery(query);
 
             if (answer != null) {
                 ResultSetMetaData answerMetaData = answer.getMetaData();
+                System.out.println("\nPurchased Ski Lessons:");
 
                 for (int i = 1; i <= answerMetaData.getColumnCount(); i++)
                     System.out.print(answerMetaData.getColumnName(i) + "\t");
-
                 System.out.println();
 
-                while (answer.next()) {
-                    System.out.println(answer.getString("lessonID") + "\t" + answer.getInt("remainingUses") + "\t" + answer.getString("name") + "\t" + answer.getString("startTime") + "\t" + answer.getString("endTime"));
-                }
+                while (answer.next())
+                    System.out.println(answer.getObject("LESSONID") + "\t\t" + answer.getObject("Remaining Uses") + "\t\t" + answer.getObject("Instructor Name") + "\t" + answer.getObject("Start Time"));
+
+                System.out.println();
             }
 
         }
@@ -631,8 +626,6 @@ public class Prog4 {
                             else System.err.println("Invalid query specifier! Please try again.\n");
                         }
                     }
-
-                    // test
 
                     case 6 -> GetMemberSkiLessonDetails(scanner, dbconn);
                     case 7 -> GetSkiPassUsageDetails();

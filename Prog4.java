@@ -391,7 +391,6 @@ public class Prog4 {
         }
     }
 
-    
     public static void deleteSkiPass(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the PassID of the user you wish to delete a Ski Pass for:");
         int passID = scanner.nextInt();
@@ -476,7 +475,7 @@ public class Prog4 {
         try {
             Statement statement = dbconn.createStatement();
             statement.executeUpdate(query);
-            System.out.printf("Equipment added successfully! Equipment ID is %d\n\n", itemID);
+            System.out.printf("Equipment added successfully! Equipment ID is %d\n\n", currentID);
         }
         catch (SQLException e) {
             System.err.println("*** SQLException: Could not add equipment.");

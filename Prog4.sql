@@ -10,7 +10,6 @@ CREATE TABLE Member (
 
 CREATE TABLE SkiPass (
     passID NUMBER(10),
-    memberID NUMBER(10),
     totalUses NUMBER(4),
     remainingUses NUMBER(4), -- 10, 25, 65, 1000
     expirationDate DATE,

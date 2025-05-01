@@ -150,29 +150,6 @@ public class Prog4 {
         return IDs;
     }
 
-    public static ArrayList<Integer> getEquipmentIDs(Connection dbconn) {
-        ArrayList<Integer> IDs = new ArrayList<>();
-        String query = "SELECT EQUIPMENTID FROM dylanchapman.EQUIPMENT";
-
-        try {
-            Statement statement = dbconn.createStatement();
-            ResultSet answer = statement.executeQuery(query);
-
-            if (answer != null) {
-                while (answer.next())
-                    IDs.add(answer.getInt("EQUIPMENTID"));
-            }
-        } catch (SQLException e) {
-            System.err.println("*** SQLException: Could not fetch query results.");
-            System.err.println("\tMessage:   " + e.getMessage());
-            System.err.println("\tSQLState:  " + e.getSQLState());
-            System.err.println("\tErrorCode: " + e.getErrorCode());
-            System.exit(-1);
-        }
-
-        return IDs;
-    }
-
     public static void addMember(Scanner scanner, Connection dbconn) {
         String query;
         System.out.println("""
@@ -453,36 +430,49 @@ public class Prog4 {
     }
 
     public static void addEquipmentInventory(Scanner scanner, Connection dbconn) {
+        // Assume an admin-only function for now
         System.out.println("""
-            Please add all necessary fields, and SEPARATE THEM WITH COMMAS
-            <Type (String: boots, poles, snowboard, skis, gear)>, <Size (XS, S, M, L, XL)>, <Rented (int: 1, 0)>, <Active (int: 1,0>)
-            """);
+                What type of equipment would you like to add (enter the corresponding integer):
+                    1. Boots     | Sizes 4.0 to 14.0 (half sizes)
+                    2. Poles     | Lengths 100 cm to 140 cm
+                    3. Skis      | Lengths 115 cm to 200 cm
+                    4. Snowboard | Lengths 90 cm to 178 cm
+                    5. Helmet    | XS, S, M, L, XL
+                """);
+        int equipmentType = scanner.nextInt();
+        scanner.nextLine(); // I'm pretty sure we need this
 
-        String input = scanner.nextLine().trim();
-        String[] attributes = input.split(",");
-
-        int currentID = Collections.max(getEquipmentIDs(dbconn)) + 1;
-
-        String query = String.format(
-                "INSERT INTO dylanchapman.EQUIPMENT VALUES(%d, '%s', '%s', '%s', %d)",
-                currentID,
-                attributes[0].trim().toLowerCase(), // Type
-                attributes[1].trim().toUpperCase(), // Size
-                Integer.parseInt(attributes[2].trim()),  // Rented
-                Integer.parseInt(attributes[3].trim())
+        Map<Integer, String> inputToEquipment = Map.of(
+                1, "BOOTS",
+                2, "POLES",
+                3, "SKIS",
+                4, "SNOWBOARD",
+                5, "HELMET"
         );
 
+        System.out.println("Enter the corresponding size for the equipment:");
+        String equipmentSize = scanner.nextLine();
+
+        int itemID = Collections.max(getItemIDs(dbconn)) + 1;
+        String query = String.format("INSERT INTO dylanchapman.Equipment VALUES (%d, '%s', '%s', %d, %d)", itemID, inputToEquipment.get(equipmentType), equipmentSize, 0, 0);
+
         try {
+            System.out.println("Equipment Type: " + equipmentType);
+            System.out.println("Equipment Size: " + equipmentSize);
+
             Statement statement = dbconn.createStatement();
-            statement.executeUpdate(query);
-            System.out.printf("Equipment added successfully! Equipment ID is %d\n\n", currentID);
+            statement.executeQuery(query);
+            System.out.println("Equipment added!\n");
         }
+
         catch (SQLException e) {
-            System.err.println("*** SQLException: Could not add equipment.");
+            System.err.println("*** SQLException: Could not fetch query results.");
             System.err.println("\tMessage:   " + e.getMessage());
             System.err.println("\tSQLState:  " + e.getSQLState());
             System.err.println("\tErrorCode: " + e.getErrorCode());
         }
+
+
     }
 
     public static void updateEquipmentInventory(Scanner scanner, Connection dbconn) {
@@ -613,7 +603,6 @@ public class Prog4 {
             System.err.println("\tMessage:   " + e.getMessage());
         }
     }
-    
 
     public static void addEquipmentRental(Scanner scanner, Connection dbconn) {
         String query;

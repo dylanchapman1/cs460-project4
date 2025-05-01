@@ -835,7 +835,7 @@ public class Prog4 {
         }
 
         String query1 = String.format("SELECT passID, liftName, time FROM dylanchapman.LiftUsage WHERE passID = %d", passID);
-        String query2 = String.format("SELECT rentalID, memberID, itemID, rentalDate, returnStatus FROM dylanchapman.EquipmentRental WHERE passID = %d", passID);
+        String query2 = String.format("SELECT rentalID, itemID, rentalDate, returnStatus FROM dylanchapman.EquipmentRental WHERE passID = %d", passID);
 
         Statement statement1, statement2;
         ResultSet answer1, answer2;
@@ -868,7 +868,7 @@ public class Prog4 {
                 System.out.println();
 
                 while (answer2.next())
-                    System.out.println("\t" + answer2.getObject("rentalID") + "\t\t" + answer2.getObject("memberID") + "\t\t" + answer2.getObject("itemID") + "\t" + answer2.getString("rentalDate").split(" ")[0] + "\t" + answer2.getObject("returnStatus"));
+                    System.out.println("\t" + answer2.getObject("rentalID") + "\t\t" + answer2.getObject("itemID") + "\t" + answer2.getString("rentalDate").split(" ")[0] + "\t" + answer2.getObject("returnStatus"));
 
                 System.out.println();
             }

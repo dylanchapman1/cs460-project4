@@ -33,6 +33,7 @@ CREATE TABLE Equipment(
     type VARCHAR2(20), -- Boots, poles, snowboards, alpine skis, & protective gear
     itemSize VARCHAR2(20), -- XS, S, M, L, XL
     rented NUMBER(1), --  0 = Unrented | 1 = Rented
+    active NUMBER(1),
     PRIMARY KEY (itemID)
 );
 
@@ -40,6 +41,7 @@ CREATE TABLE EquipmentRental (
     rentalID NUMBER(38),
     memberID NUMBER(38),
     passID NUMBER(38),
+    itemID NUMBER(38),
     rentalDate DATE,
     returnStatus NUMBER(38), -- 0 = unused | 1 = in use
     PRIMARY KEY (rentalID)
@@ -93,7 +95,7 @@ CREATE TABLE Lift (
 CREATE TABLE LiftUsage(
     passID NUMBER(10),
     liftName VARCHAR2(50),
-    time TIMESTAMP(6),
+    time TIMESTAMP(0),
     PRIMARY KEY (passID)
 );
 

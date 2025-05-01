@@ -476,7 +476,7 @@ public class Prog4 {
         try {
             Statement statement = dbconn.createStatement();
             statement.executeUpdate(query);
-            System.out.printf("Equipment added successfully! Equipment ID is %d\n\n", currentID);
+            System.out.printf("Equipment added successfully! Equipment ID is %d\n\n", itemID);
         }
         catch (SQLException e) {
             System.err.println("*** SQLException: Could not add equipment.");
@@ -805,39 +805,26 @@ public class Prog4 {
             return;
         }
 
-
-        String query = String.format("""
-                SELECT
-                    LessonPurchase.lessonID,
-                    LessonPurchase.remainingUses,
-                    Employee.name,
-                    Lesson.startTime
-                FROM andrewhicks.LessonPurchase
-                
-                JOIN Lesson ON LessonPurchase.lessonID = Lesson.lessonID
-                JOIN Employee ON Lesson.instructorID = Employee.employeeID
-                WHERE LessonPurchase.memberID = %d
-                ORDER BY Lesson.startTime;
-                """, memberID);
+        String query = "SELECT LessonPurchase.lessonID, LessonPurchase.remainingUses as \"Remaining Uses\", Employee.name as \"Instructor Name\", startTime as \"Start Time\" FROM dylanchapman.LessonPurchase JOIN dylanchapman.Lesson ON LessonPurchase.lessonID = Lesson.lessonID JOIN dylanchapman.Employee ON Lesson.instructorID = Employee.employeeID WHERE LessonPurchase.memberID = " + memberID;
 
         Statement statement;
         ResultSet answer;
-
         try {
             statement = dbconn.createStatement();
             answer = statement.executeQuery(query);
 
             if (answer != null) {
                 ResultSetMetaData answerMetaData = answer.getMetaData();
+                System.out.println("\nPurchased Ski Lessons:");
 
                 for (int i = 1; i <= answerMetaData.getColumnCount(); i++)
                     System.out.print(answerMetaData.getColumnName(i) + "\t");
-
                 System.out.println();
 
-                while (answer.next()) {
-                    System.out.println(answer.getString("lessonID") + "\t" + answer.getInt("remainingUses") + "\t" + answer.getString("name") + "\t" + answer.getString("startTime") + "\t" + answer.getString("endTime"));
-                }
+                while (answer.next())
+                    System.out.println(answer.getObject("LESSONID") + "\t\t" + answer.getObject("Remaining Uses") + "\t\t" + answer.getObject("Instructor Name") + "\t" + answer.getObject("Start Time"));
+
+                System.out.println();
             }
 
         }
@@ -849,7 +836,62 @@ public class Prog4 {
         }
     }
 
-    public static void GetSkiPassUsageDetails() {
+    public static void GetSkiPassUsageDetails(Scanner scanner, Connection dbconn) {
+        System.out.println("Enter a passID (Your ID for your Ski Pass:");
+        int passID = scanner.nextInt();
+        scanner.nextLine(); // I'm pretty sure we need this
+
+        if (!getPassIDs(dbconn).contains(passID)) {
+            System.out.println("Ski Pass ID does not exist!\n");
+            return;
+        }
+
+        String query1 = String.format("SELECT passID, liftName, time FROM dylanchapman.LiftUsage WHERE passID = %d", passID);
+        String query2 = String.format("SELECT rentalID, memberID, itemID, rentalDate, returnStatus FROM dylanchapman.EquipmentRental WHERE passID = %d", passID);
+
+        Statement statement1, statement2;
+        ResultSet answer1, answer2;
+        try {
+            ResultSetMetaData answerMetaData;
+            statement1 = dbconn.createStatement();
+            statement2 = dbconn.createStatement();
+
+            answer1 = statement1.executeQuery(query1);
+            answer2 = statement2.executeQuery(query2);
+
+            if (answer1 != null && answer2 != null) {
+                System.out.println("\nLift Ride Information");
+                answerMetaData = answer1.getMetaData();
+                System.out.print("\t");
+                for (int i = 1; i <= answerMetaData.getColumnCount(); i++)
+                    System.out.print(answerMetaData.getColumnName(i) + "\t");
+                System.out.println();
+
+
+                while (answer1.next())
+                    System.out.println("\t" + answer1.getObject("passID") + "\t" + answer1.getObject("liftName") + "\t" + answer1.getObject("time"));
+
+
+                System.out.println("\nEquipment Rental Information");
+                answerMetaData = answer2.getMetaData();
+                System.out.print("\t");
+                for (int i = 1; i <= answerMetaData.getColumnCount(); i++)
+                    System.out.print(answerMetaData.getColumnName(i) + "\t");
+                System.out.println();
+
+                while (answer2.next())
+                    System.out.println("\t" + answer2.getObject("rentalID") + "\t\t" + answer2.getObject("memberID") + "\t\t" + answer2.getObject("itemID") + "\t" + answer2.getString("rentalDate").split(" ")[0] + "\t" + answer2.getObject("returnStatus"));
+
+                System.out.println();
+            }
+
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not add equipment.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
 
     }
 
@@ -1030,7 +1072,7 @@ public class Prog4 {
                     }
 
                     case 6 -> GetMemberSkiLessonDetails(scanner, dbconn);
-                    case 7 -> GetSkiPassUsageDetails();
+                    case 7 -> GetSkiPassUsageDetails(scanner, dbconn);
                     case 8 -> GetOpenIntermediateTrails();
                     case 9 -> CustomQuery();
                 }

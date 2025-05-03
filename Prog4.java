@@ -230,7 +230,7 @@ public class Prog4 {
         String[] attributes = input.split(",");
 
         query = String.format(
-                "UPDATE dylanchapman.Member SET PHONENO = %d, EMAIL = '%s', EMERGENCYCONTACTNO = %d WHERE MEMBERID = %d",
+                "UPDATE dylanchapman.Member SET PHONENO = %d, EMAIL = '%s', EMERGENCYCONTACTNUMBER = %d WHERE MEMBERID = %d",
                 Long.parseLong(attributes[0]),
                 attributes[1].trim(),
                 Long.parseLong(attributes[2].trim()),
@@ -264,7 +264,7 @@ public class Prog4 {
         int memberID = scanner.nextInt();
         scanner.nextLine(); // I'm pretty sure we need this
 
-        if (!getMemberIDs(dbconn).contains(memberID)) {
+        if(!getMemberIDs(dbconn).contains(memberID)) {
             System.out.println("Member ID does not exist!\n");
             return;
         }
@@ -286,13 +286,17 @@ public class Prog4 {
 
         // Will be 1,2,3, or 4
         String selectedPass = scanner.nextLine().trim();
+
+        int passID = Collections.max(getPassIDs(dbconn)) + 1;
+
         String query = String.format(
                 "INSERT INTO dylanchapman.SkiPass VALUES(%d, %d, %d, %d, TO_DATE('2024-12-31', 'YYYY-MM-DD'), %d)",
-                memberID * 2,
+                passID,
                 memberID,
                 skiPassMap.get(selectedPass)[0],
                 skiPassMap.get(selectedPass)[0],
-                skiPassMap.get(selectedPass)[1]
+                skiPassMap.get(selectedPass)[1],
+                1
         );
 
 
@@ -479,7 +483,7 @@ public class Prog4 {
         String equipmentSize = scanner.nextLine();
 
         int itemID = Collections.max(getItemIDs(dbconn)) + 1;
-        String query = String.format("INSERT INTO dylanchapman.Equipment VALUES (%d, '%s', '%s', %d, %d)", itemID, inputToEquipment.get(equipmentType), equipmentSize, 0, 0);
+        String query = String.format("INSERT INTO dylanchapman.Equipment VALUES (%d, '%s', '%s', %d, %d)", itemID, inputToEquipment.get(equipmentType), equipmentSize, 0, 1);
 
         try {
             System.out.println("Equipment Type: " + equipmentType);
@@ -501,87 +505,63 @@ public class Prog4 {
     }
 
     public static void updateEquipmentInventory(Scanner scanner, Connection dbconn) {
-        System.out.println("Please enter the ItemID of the record you wish to update:");
-        int ItemID = scanner.nextInt();
+        System.out.println("Please enter the ItemID of the equipment you wish to update:");
+        int itemID = scanner.nextInt();
         scanner.nextLine();
     
-        if (!getItemIDs(dbconn).contains(ItemID)) {
+        if(!getItemIDs(dbconn).contains(itemID)) {
             System.out.println("ItemID does not exist!\n");
             return;
         }
     
-        ArrayList<String> cols = new ArrayList<>();
-        try(ResultSet answer = dbconn.getMetaData().getColumns(null, "DYLANCHAPMAN", "EQUIPMENT", null)) {
-            while(answer.next()) {
-                cols.add(answer.getString("COLUMN_NAME"));
-            }
-        }
-        catch(SQLException e) {
-            System.out.println("SQL error while reading column metadata.");
+        System.out.println("""
+                What type of equipment would you like to change it to (enter the corresponding integer):
+                    1. Boots     | Sizes 4.0 to 14.0 (half sizes)
+                    2. Poles     | Lengths 100 cm to 140 cm
+                    3. Skis      | Lengths 115 cm to 200 cm
+                    4. Snowboard | Lengths 90 cm to 178 cm
+                    5. Helmet    | XS, S, M, L, XL
+                """);
+    
+        int equipmentType = scanner.nextInt();
+        scanner.nextLine();
+    
+        Map<Integer, String> inputToEquipment = Map.of(
+                1, "BOOTS",
+                2, "POLES",
+                3, "SKIS",
+                4, "SNOWBOARD",
+                5, "HELMET"
+        );
+    
+        if(!inputToEquipment.containsKey(equipmentType)) {
+            System.out.println("Invalid equipment type selected.");
             return;
         }
     
-        cols.remove("ITEMID");
+        System.out.println("Enter the corresponding size for the equipment:");
+        String equipmentSize = scanner.nextLine();
     
-        String sql = "UPDATE dylanchapman.EQUIPMENT SET ";
-        String[] vals = new String[cols.size()];
+        String updateQuery = "UPDATE dylanchapman.EQUIPMENT SET EQUIPMENTTYPE = ?, EQUIPMENTSIZE = ? WHERE ITEMID = ?";
     
-        int i = 0;
-        while(i < cols.size()) {
-            String col = cols.get(i);
-            String input;
-            System.out.println("Enter a new value for " + col + ": ");
-            input = scanner.nextLine();
-            vals[i] = input;
-            sql += col + " = ?";
-            if(i < cols.size() - 1) {
-                sql += ", ";
-            }
-            i++;
-        }
-    
-        sql += " WHERE ITEMID = ?";
-
-        List<String> allowedTypes = Arrays.asList("SKIS", "SNOWBOARD", "BOOTS", "HELMET", "SNOWMOBILE");
-        List<String> allowedSize = Arrays.asList("SMALL", "MEDIUM", "LARGE", "XLARGE", "ONESIZE");
-
-        // SKI, SNOWBOARD, BOOTS, HELMET, POLES, SNOWMOBILE
-        try {
-            PreparedStatement prep = dbconn.prepareStatement(sql);
-            i = 0;
-            while(i < vals.length) {
-                String col = cols.get(i).toUpperCase();
-                String val = vals[i].toUpperCase().trim();
-        
-                if(col.equals("TYPE")) {
-                    if(!allowedTypes.contains(val.toUpperCase())) {
-                        System.out.println("Type must be one of: SKI, SNOWBOARD, BOOTS, HELMET, POLES, SNOWMOBILE.");
-                        return;
-                    }
-                }
-        
-                if(col.equals("ITEMSIZE")) {
-                    if(!allowedSize.contains(val.toUpperCase())) {
-                        System.out.println("Size must be one of: SMALL, MEDIUM, LARGE, XLARGE, ONESIZE.");
-                        return;
-                    }
-                }
-                prep.setString(i + 1, vals[i].toUpperCase());
-                i++;
-            }
-    
-            prep.setInt(i + 1, ItemID);
+        try(PreparedStatement prep = dbconn.prepareStatement(updateQuery)) {
+            prep.setString(1, inputToEquipment.get(equipmentType));
+            prep.setString(2, equipmentSize.toUpperCase());
+            prep.setInt(3, itemID);
     
             int count = prep.executeUpdate();
             if(count > 0) {
-                System.out.println("record updated");
+                System.out.println("Equipment updated successfully!\n");
             } 
             else {
-                System.out.println("no record found");
+                System.out.println("No matching record found.\n");
             }
-        }
+        } 
         catch (SQLException e) {
-            System.out.println("SQL error: " + e.getMessage());
+            System.err.println("*** SQLException: Could not update equipment.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
         }
     }
 
@@ -633,7 +613,7 @@ public class Prog4 {
         String query;
         System.out.println("""
                         Please add all necessary fields, and SEPARATE THEM WITH COMMAS
-                        <MEMBERID (int)>, <PassID (int)>, <RentalDate (YYYY-MM-DD)>, <ReturnStatus (int)>, <ItemID (int)>
+                        <PassID (int)>, <ReturnStatus (int)>, <ItemID (int)>, <Archived (int)>, <StartDate (YYYY-MM-DD)>, <EndDate (YYYY-MM-DD)>
                         """);
 
         String input  = scanner.nextLine().trim();
@@ -641,31 +621,29 @@ public class Prog4 {
         int currentID = Collections.max(getRentalIDs(dbconn)) + 1;
 
         try {
-            int memId = Integer.parseInt(attributes[0].trim());
-            if (!getMemberIDs(dbconn).contains(memId)) {
-                System.out.println("That MEMBERID does not exist. Try again.");
-                return;
-            }
-    
-            int passId = Integer.parseInt(attributes[1].trim());
+            int passId = Integer.parseInt(attributes[0].trim());
             if (!getPassIDs(dbconn).contains(passId)) {
                 System.out.println("That PASSID does not exist. Try again.");
                 return;
             }
-    
-            int itemId = Integer.parseInt(attributes[4].trim());
+            int returnStatus = Integer.parseInt(attributes[1].trim());
+
+            int itemId = Integer.parseInt(attributes[2].trim());
             if (!getItemIDs(dbconn).contains(itemId)) {
                 System.out.println("That ITEMID does not exist. Try again.");
                 return;
             }
     
-            String rentalDate = attributes[2].trim();
-            int returnStatus = Integer.parseInt(attributes[3].trim());
+            int archived = Integer.parseInt(attributes[3].trim());
+
+            String startDate = attributes[4].trim();
+            String endDate = attributes[5].trim();
+            
     
             query = String.format(
-                "INSERT INTO dylanchapman.EquipmentRentalRecord " +
-                "VALUES (%d, %d, %d, TO_DATE('%s', 'YYYY-MM-DD'), %d, %d)",
-                currentID, memId, passId, rentalDate, returnStatus, itemId
+                "INSERT INTO dylanchapman.EquipmentRental " +
+                "VALUES (%d, %d, %d, %d, %d, TO_TIMESTAMP('%s', 'YYYY-MM-DD'), TO_TIMESTAMP('%s', 'YYYY-MM-DD'))",
+                currentID, passId, returnStatus, itemId, archived, startDate, endDate
             );
     
             Statement statement = dbconn.createStatement();
@@ -686,114 +664,157 @@ public class Prog4 {
         int rentalID = scanner.nextInt();
         scanner.nextLine();
     
-        if (!getRentalIDs(dbconn).contains(rentalID)) {
+        if(!getRentalIDs(dbconn).contains(rentalID)) {
             System.out.println("RentalID does not exist!\n");
             return;
         }
     
-        ArrayList<String> cols = new ArrayList<>();
-        try(ResultSet answer = dbconn.getMetaData().getColumns(null, "DYLANCHAPMAN", "EQUIPMENTRENTAL", null)) {
-            while(answer.next()) {
-                cols.add(answer.getString("COLUMN_NAME"));
-            }
-        }
-        catch(SQLException e) {
-            System.out.println("SQL error while reading column metadata.");
+        System.out.println("""
+            Please enter the updated values, separated by commas:
+            <PassID (int)>, <ReturnStatus (int)>, <ItemID (int)>, <Archived (int)>, <StartDate (YYYY-MM-DD HH:MM:SS)>, <EndDate (YYYY-MM-DD HH:MM:SS)>
+        """);
+    
+        String input = scanner.nextLine().trim();
+        String[] attributes = input.split(",");
+    
+        if(attributes.length != 6) {
+            System.out.println("Please provide exactly 6 fields.");
             return;
         }
     
-        cols.remove("RENTALID");
-    
-        String sql = "UPDATE dylanchapman.EQUIPMENTRENTAL SET ";
-        String[] vals = new String[cols.size()];
-    
-        int i = 0;
-        while(i < cols.size()) {
-            String col = cols.get(i);
-            String input;
-    
-            while(true) {
-                System.out.println("Enter a new value for " + col + ": ");
-                input = scanner.nextLine();
-    
-                if(col.equalsIgnoreCase("MEMBERID")) {
-                    try {
-                        int memId = Integer.parseInt(input);
-                        if(!getMemberIDs(dbconn).contains(memId)) {
-                            System.out.println("That MEMBERID does not exist. Try again.");
-                            continue;
-                        }
-                    }
-                    catch(NumberFormatException e) {
-                        System.out.println("Please enter a valid MEMBERID.");
-                        continue;
-                    }
-                }
-    
-                if(col.equalsIgnoreCase("PASSID")) {
-                    try {
-                        int passId = Integer.parseInt(input);
-                        if(!getPassIDs(dbconn).contains(passId)) {
-                            System.out.println("That PASSID does not exist. Try again.");
-                            continue;
-                        }
-                    }
-                    catch(NumberFormatException e) {
-                        System.out.println("Please enter a valid PASSID.");
-                        continue;
-                    }
-                }
-                break;
-            }
-    
-            vals[i] = input;
-            sql += col + " = ?";
-            if(i < cols.size() - 1) {
-                sql += ", ";
-            }
-            i++;
-        }
-    
-        sql += " WHERE RENTALID = ?";
-    
         try {
-            PreparedStatement prep = dbconn.prepareStatement(sql);
-            i = 0;
-            while(i < vals.length) {
-                if(i == 2) {
-                    try {
-                        java.sql.Date sqlDate = java.sql.Date.valueOf(vals[i]); //  YYYY-MM-DD
-                        prep.setDate(i + 1, sqlDate);
-                    } 
-                    catch(IllegalArgumentException e) {
-                        System.out.println("YYYY-MM-DD format.");
-                        return;
-                    }
+            int passId = Integer.parseInt(attributes[0].trim());
+            if(!getPassIDs(dbconn).contains(passId)) {
+                System.out.println("That PASSID does not exist. Try again.");
+                return;
+            }
+    
+            int returnStatus = Integer.parseInt(attributes[1].trim());
+    
+            int itemId = Integer.parseInt(attributes[2].trim());
+            if(!getItemIDs(dbconn).contains(itemId)) {
+                System.out.println("That ITEMID does not exist. Try again.");
+                return;
+            }
+    
+            int archived = Integer.parseInt(attributes[3].trim());
+    
+            String startDate = attributes[4].trim();
+            String endDate = attributes[5].trim();
+    
+            String sql = "UPDATE dylanchapman.EQUIPMENTRENTAL SET " +
+                         "PASSID = ?, RETURNSTATUS = ?, ITEMID = ?, ARCHIVED = ?, " +
+                         "STARTDATE = TO_TIMESTAMP(?, 'YYYY-MM-DD HH24:MI:SS'), ENDDATE = TO_TIMESTAMP(?, 'YYYY-MM-DD HH24:MI:SS') " +
+                         "WHERE RENTALID = ?";
+    
+            try(PreparedStatement prep = dbconn.prepareStatement(sql)) {
+                prep.setInt(1, passId);
+                prep.setInt(2, returnStatus);
+                prep.setInt(3, itemId);
+                prep.setInt(4, archived);
+                prep.setString(5, startDate);
+                prep.setString(6, endDate);
+                prep.setInt(7, rentalID);
+                System.out.println("Prepared statement created successfully, uploading");
+                int count = prep.executeUpdate();
+                if(count > 0) {
+                    System.out.println("Rental record updated successfully!\n");
                 } 
                 else {
-                    prep.setString(i + 1, vals[i]);
+                    System.out.println("No matching record found.\n");
                 }
-                i++;
             }
     
-            prep.setInt(i + 1, rentalID);
-    
-            int count = prep.executeUpdate();
-            if(count > 0) {
-                System.out.println("record updated");
-            } 
-            else {
-                System.out.println("no record found");
-            }
-        }
-        catch (SQLException e) {
-            System.out.println("SQL error: " + e.getMessage());
+        } 
+        catch(NumberFormatException e) {
+            System.out.println("Invalid number format in one or more fields. Please try again.");
+        } 
+        catch(SQLException e) {
+            System.err.println("*** SQLException: Could not update rental.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
         }
     }
     
+    
 
     public static void deleteEquipmentRental(Scanner scanner, Connection dbconn) {
+        System.out.println("Please enter the RentalID of the equipment you wish to archive:");
+        int rentalID = scanner.nextInt();
+        scanner.nextLine();
+    
+        // Step 1: Get PASSID, ITEMID, STARTDATE, ENDDATE
+        String rentalInfoQuery = String.format(
+            "SELECT PASSID, ITEMID, STARTDATE, ENDDATE FROM dylanchapman.EQUIPMENTRENTAL WHERE RENTALID = %d",
+            rentalID
+        );
+    
+        int passId = -1;
+        int itemId = -1;
+        Timestamp startDate = null;
+        Timestamp endDate = null;
+    
+        try(Statement stmt = dbconn.createStatement();
+             ResultSet rs = stmt.executeQuery(rentalInfoQuery)) {
+    
+            if(rs.next()) {
+                passId = rs.getInt("PASSID");
+                itemId = rs.getInt("ITEMID");
+                startDate = rs.getTimestamp("STARTDATE");
+                endDate = rs.getTimestamp("ENDDATE");
+            } 
+            else {
+                System.out.println("No rental found with that RentalID.");
+                return;
+            }
+    
+        } 
+        catch(SQLException e) {
+            System.err.println("Error retrieving rental details: " + e.getMessage());
+            return;
+        }
+    
+        String usageCheckQuery = String.format(
+            "SELECT COUNT(*) AS usage_count FROM dylanchapman.LIFTUSAGE " +
+            "WHERE PASSID = %d AND TIME BETWEEN TO_TIMESTAMP('%s', 'YYYY-MM-DD HH24:MI:SS') " +
+            "AND TO_TIMESTAMP('%s', 'YYYY-MM-DD HH24:MI:SS')",
+            passId,
+            startDate.toString().substring(0, 19),
+            endDate.toString().substring(0, 19)
+        );
+    
+        try(Statement stmt = dbconn.createStatement();
+             ResultSet rs = stmt.executeQuery(usageCheckQuery)) {
+    
+            if(rs.next() && rs.getInt("usage_count") > 0) {
+                System.out.println("This rental has lift usage and cannot be archived.");
+                return;
+            }
+    
+        } catch (SQLException e) {
+            System.err.println("Error checking lift usage: " + e.getMessage());
+            return;
+        }
 
+        String archiveQuery = String.format(
+            "UPDATE dylanchapman.EQUIPMENTRENTAL SET ARCHIVED = 1 WHERE RENTALID = %d",
+            rentalID
+        );
+    
+        try(Statement stmt = dbconn.createStatement()) {
+            int rows = stmt.executeUpdate(archiveQuery);
+            if(rows > 0) {
+                System.out.printf("Rental with RentalID %d archived successfully.\n", rentalID);
+            } 
+            else {
+                System.out.println("Archiving failed — no rows were updated.");
+            }
+    
+        } 
+        catch (SQLException e) {
+            System.err.println("Error archiving rental: " + e.getMessage());
+        }
     }
 
     public static void addLessonPurchase(Scanner scanner, Connection dbconn) {

@@ -918,7 +918,7 @@ public class Prog4 {
         );
     
         try(Statement stmt = dbconn.createStatement()) {
-             ResultSet rs = stmt.executeQuery(usageCheckQuery);
+            ResultSet rs = stmt.executeQuery(usageCheckQuery);
     
             if(rs.next() && rs.getInt("usage_count") > 0) {
                 System.out.println("This rental has lift usage and cannot be archived.");

@@ -6,6 +6,7 @@
  */
 
 import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -231,6 +232,89 @@ public class Prog4 {
         int memberID = scanner.nextInt();
         scanner.nextLine(); // I'm pretty sure we need this
 
+        if (!getMemberIDs(dbconn).contains(memberID)) {
+            System.out.println("Member ID does not exist!\n");
+            return;
+        }
+
+        int skiPassID = 0;
+        String getSkiPass = String.format("SELECT passID FROM dylanchapman.SkiPass WHERE memberID = %d", memberID);
+
+        Statement statement = null;
+        ResultSet answer = null;
+        try {
+            statement = dbconn.createStatement();
+            answer = statement.executeQuery(getSkiPass);
+
+            if (answer != null) {
+                while (answer.next())
+                    skiPassID = answer.getInt("passID");
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not generate a query to find the skiPass of a member.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
+
+        System.out.println("The passID of memberID " + memberID + " is " + skiPassID + "\n\n");
+
+        String activeSkiPassQuery = String.format("SELECT COUNT(*) FROM dylanchapman.SkiPass WHERE memberID = %d AND active = 1", memberID);
+        String openRentalRecordsQuery = String.format("SELECT COUNT(*) FROM dylanchapman.EquipmentRental WHERE passID = %d AND returnStatus = 0", skiPassID);
+        String unusedLessonSessionsQuery = String.format("SELECT COUNT(*) FROM dylanchapman.LessonPurchase WHERE memberID = %d AND remainingUses > 0", memberID);
+
+        try {
+            int skiPassCount = 0, openRentalCount = 0, unusedLessonsCount = 0;
+
+            // Query 1: Active Ski Passes
+            try (Statement stmt1 = dbconn.createStatement();
+                 ResultSet skiPassAnswer = stmt1.executeQuery(activeSkiPassQuery)) {
+                if (skiPassAnswer.next()) {
+                    skiPassCount = skiPassAnswer.getInt(1);
+                }
+            }
+
+            // Query 2: Open Rental Records
+            try (Statement stmt2 = dbconn.createStatement();
+                 ResultSet openRentalAnswer = stmt2.executeQuery(openRentalRecordsQuery)) {
+                if (openRentalAnswer.next()) {
+                    openRentalCount = openRentalAnswer.getInt(1);
+                }
+            }
+
+            // Query 3: Unused Lesson Sessions
+            try (Statement stmt3 = dbconn.createStatement();
+                 ResultSet unusedLessonsAnswer = stmt3.executeQuery(unusedLessonSessionsQuery)) {
+                if (unusedLessonsAnswer.next()) {
+                    unusedLessonsCount = unusedLessonsAnswer.getInt(1);
+                }
+            }
+
+            if (skiPassCount == 0 && openRentalCount == 0 && unusedLessonsCount == 0) {
+                // Safe to delete
+                String deleteQuery = String.format("DELETE FROM Member WHERE memberID = %d", memberID);
+                try (Statement deleteStmt = dbconn.createStatement()) {
+                    deleteStmt.executeUpdate(deleteQuery);
+                    System.out.println("Member successfully deleted.");
+                }
+            }
+            else {
+                System.out.println("Member cannot be deleted. Outstanding obligations exist:");
+                if (skiPassCount > 0) System.out.println(" - Active ski passes.");
+                if (openRentalCount > 0) System.out.println(" - Open equipment rentals.");
+                if (unusedLessonsCount > 0) System.out.println(" - Unused lesson sessions.");
+                System.out.println();
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
+
+
 
     }
 
@@ -337,7 +421,7 @@ public class Prog4 {
             while(i < vals.length) {
                 if (i == 2) {
                         try {
-                                java.sql.Date sqlDate = java.sql.Date.valueOf(vals[i]); // YYYY-MM-DD
+                                Date sqlDate = Date.valueOf(vals[i]); // YYYY-MM-DD
                                 prep.setDate(i + 1, sqlDate);
                                 i++;
                         }
@@ -737,7 +821,7 @@ public class Prog4 {
             while(i < vals.length) {
                 if(i == 2) {
                     try {
-                        java.sql.Date sqlDate = java.sql.Date.valueOf(vals[i]); //  YYYY-MM-DD
+                        Date sqlDate = Date.valueOf(vals[i]); //  YYYY-MM-DD
                         prep.setDate(i + 1, sqlDate);
                     } 
                     catch(IllegalArgumentException e) {

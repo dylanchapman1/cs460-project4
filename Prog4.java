@@ -800,7 +800,7 @@ public class Prog4 {
     	String query;
         System.out.println("""
                         Please add all necessary fields, and SEPARATE THEM WITH COMMAS
-                        <LessonID (int)>, <MemberID>, <PurchaseTime (YYYY-MM-DD)>, <RemainingUses(int)>
+                        <LessonID (int)>, <MemberID> (int), <PurchaseDate (YYYY-MM-DD)>, <RemainingUses(int)>
                         """);
         //TotalUses will be set to 0 by default.
 
@@ -811,7 +811,7 @@ public class Prog4 {
         int temp = 0;
         query = String.format(
         		"INSERT INTO dylanchapman.LessonPurchase VALUES(%d, '%s', '%s', TO_DATE('%s', 'YYYY-MM-DD'), 0, '%s')",
-        		currentID, //OrderID
+        		currentID, // OrderID - PK
         		attributes[0].trim(), // LessonID
         		attributes[1].trim(), // MemberID
         		attributes[2].trim(), //Purchase Time (Date)
@@ -836,7 +836,47 @@ public class Prog4 {
     }
 
     public static void updateLessonPurchase(Scanner scanner, Connection dbconn) {
+    	System.out.println("Please enter the Lesson OrderID to be updated:");
+        int orderID = scanner.nextInt();
+        scanner.nextLine(); // I'm pretty sure we need this
 
+        if (!getOrderIDs(dbconn).contains(orderID)) {
+            System.out.println("OrderID "+ orderID +" does not exist!\n");
+            return;
+        }
+
+        String query;
+        System.out.println("""
+                        Please reenter all necessary fields, and SEPARATE THEM WITH COMMAS
+                        <LessonID (int)>, <MemberID (int)>, <PurchaseDate (YYYY-MM-DD)>, <TotalUses (int)>, <RemainingUses(int)>
+                        """);
+
+        String input  = scanner.nextLine().trim();
+        String[] attributes = input.split(",");
+
+        query = String.format(
+        		"UPDATE dylanchapman.LessonPurchase SET LessonID = '%s', MemberID = '%s', PurchaseDate = TO_DATE('%s', 'YYYY-MM-DD'), "
+        		+ "TotalUses = '%s', RemainingUses = '%s' WHERE OrderID = '%d'",        		
+        		attributes[0].trim(), // LessonID
+        		attributes[1].trim(), // MemberID
+        		attributes[2].trim(), // Purchase Time (Date)
+        		attributes[3].trim(), // Total Uses
+        		attributes[4].trim(), // Remaining Uses
+        		orderID // OrderID
+        );
+
+        try {
+            Statement statement = dbconn.createStatement();
+            statement.executeUpdate(query);
+            System.out.printf("Lesson Purchase Order ID %d has been succesfully updated\n\n", orderID);
+        }
+
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
     }
 
     public static void deleteLessonPurchase(Scanner scanner, Connection dbconn) {

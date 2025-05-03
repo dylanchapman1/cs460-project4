@@ -270,34 +270,83 @@ public class Prog4 {
             // Query 1: Active Ski Passes
             try (Statement stmt1 = dbconn.createStatement();
                  ResultSet skiPassAnswer = stmt1.executeQuery(activeSkiPassQuery)) {
-                if (skiPassAnswer.next()) {
+                if (skiPassAnswer.next())
                     skiPassCount = skiPassAnswer.getInt(1);
-                }
             }
 
             // Query 2: Open Rental Records
             try (Statement stmt2 = dbconn.createStatement();
                  ResultSet openRentalAnswer = stmt2.executeQuery(openRentalRecordsQuery)) {
-                if (openRentalAnswer.next()) {
+                if (openRentalAnswer.next())
                     openRentalCount = openRentalAnswer.getInt(1);
-                }
             }
 
             // Query 3: Unused Lesson Sessions
             try (Statement stmt3 = dbconn.createStatement();
                  ResultSet unusedLessonsAnswer = stmt3.executeQuery(unusedLessonSessionsQuery)) {
-                if (unusedLessonsAnswer.next()) {
+                if (unusedLessonsAnswer.next())
                     unusedLessonsCount = unusedLessonsAnswer.getInt(1);
-                }
             }
 
             if (skiPassCount == 0 && openRentalCount == 0 && unusedLessonsCount == 0) {
                 // Safe to delete
-                String deleteQuery = String.format("DELETE FROM Member WHERE memberID = %d", memberID);
-                try (Statement deleteStmt = dbconn.createStatement()) {
-                    deleteStmt.executeUpdate(deleteQuery);
-                    System.out.println("Member successfully deleted.");
+                try {
+                    dbconn.setAutoCommit(false); // Start transaction
+
+                    // Delete lift usage logs
+                    String deleteLiftUsage = String.format("DELETE FROM LiftUsage WHERE passID = %d", skiPassID);
+                    try (Statement stmt = dbconn.createStatement()) {
+                        stmt.executeUpdate(deleteLiftUsage);
+                    }
+
+                    // Delete ski pass data
+                    String deleteSkiPass = String.format("DELETE FROM SkiPass WHERE memberID = %d", memberID);
+                    try (Statement stmt = dbconn.createStatement()) {
+                        stmt.executeUpdate(deleteSkiPass);
+                    }
+
+                    // Delete rental history
+                    String deleteRentals = String.format("DELETE FROM dylanchapman.EquipmentRental WHERE passID = %d", skiPassID);
+                    try (Statement stmt = dbconn.createStatement()) {
+                        stmt.executeUpdate(deleteRentals);
+                    }
+
+                    // Delete lesson purchases
+                    String deleteLessonPurchases = String.format("DELETE FROM dylanchapman.LessonPurchase WHERE memberID = %d", memberID);
+                    try (Statement stmt = dbconn.createStatement()) {
+                        stmt.executeUpdate(deleteLessonPurchases);
+                    }
+
+                    // Finally, delete the member
+                    String deleteMember = String.format("DELETE FROM Member WHERE memberID = %d", memberID);
+                    try (Statement stmt = dbconn.createStatement()) {
+                        stmt.executeUpdate(deleteMember);
+                    }
+
+                    dbconn.commit(); // All deletions succeeded
+                    System.out.println("Member and all related data successfully deleted.");
+
+                } catch (SQLException e) {
+                    try {
+                        dbconn.rollback(); // Undo changes if something fails
+                        System.out.println("Deletion failed. All changes rolled back.");
+                    }
+                    catch (SQLException rollbackEx) {
+                        System.err.println("Rollback failed: " + rollbackEx.getMessage());
+                    }
+                    System.err.println("Error during deletion: " + e.getMessage());
                 }
+                finally {
+                    try {
+                        dbconn.setAutoCommit(true); // Restore default
+                    }
+                    catch (SQLException ex) {
+                        System.err.println("Failed to reset auto-commit: " + ex.getMessage());
+                    }
+                }
+
+
+
             }
             else {
                 System.out.println("Member cannot be deleted. Outstanding obligations exist:");

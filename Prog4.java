@@ -901,7 +901,48 @@ public class Prog4 {
     }
 
     public static void deleteLessonPurchase(Scanner scanner, Connection dbconn) {
+    	System.out.println("Please enter the LessonPurchase OrderID to be deleted.");
+        int orderID = scanner.nextInt();
+        scanner.nextLine();
 
+        if (!getOrderIDs(dbconn).contains(orderID)) {
+            System.out.println("No such OrderID within LessonPurchase!\n");
+            return;        
+        }
+        String queryGet = String.format(
+        		"SELECT * FROM dylanchapman.lessonpurchase WHERE OrderID = '%s' ", orderID);
+        
+        String queryDelete = String.format(
+        		"DELETE FROM dylanchapman.lessonpurchase WHERE OrderID = '%s'", orderID);
+        
+        try {
+            Statement statement = dbconn.createStatement();
+            ResultSet result = statement.executeQuery(queryGet);
+            int fetchedTotalUses = -1;
+            if(result.next()) {
+            	fetchedTotalUses = result.getInt("TotalUses");
+            }
+            System.out.println("Retrieved TotalUse value: " + fetchedTotalUses);
+
+            // We can ONLY delete a LessonPurchase record if TotalUses = 0 (unused)
+            if (fetchedTotalUses == 0) {
+            	statement.executeUpdate(queryDelete);            	
+            }else {
+            	System.out.printf("The Lesson Purchase OrderID #%s has '%s' use(s), so cannot be deleted.\n\n",
+            			orderID, fetchedTotalUses);
+            	return;
+            }     
+            
+            
+            System.out.printf("Lesson Purchase Order ID %d has been succesfully deleted.\n\n", orderID);
+        }   
+
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
     }
 
     public static void GetMemberSkiLessonDetails(Scanner scanner, Connection dbconn) {

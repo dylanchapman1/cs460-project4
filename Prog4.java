@@ -149,6 +149,31 @@ public class Prog4 {
 
         return IDs;
     }
+    
+    public static ArrayList<Integer> getOrderIDs(Connection dbconn) {
+        ArrayList<Integer> IDs = new ArrayList<>();
+        String query = "SELECT OrderID FROM dylanchapman.LESSONPURCHASE";
+
+        try {
+            Statement statement = dbconn.createStatement();
+            ResultSet answer = statement.executeQuery(query);
+
+            if (answer != null) {
+                while (answer.next())
+                    IDs.add(answer.getInt("ORDERID"));
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+            System.exit(-1);
+
+        }
+
+        return IDs;
+    }
 
     public static void addMember(Scanner scanner, Connection dbconn) {
         String query;
@@ -772,6 +797,41 @@ public class Prog4 {
     }
 
     public static void addLessonPurchase(Scanner scanner, Connection dbconn) {
+    	String query;
+        System.out.println("""
+                        Please add all necessary fields, and SEPARATE THEM WITH COMMAS
+                        <LessonID (int)>, <MemberID>, <PurchaseTime (YYYY-MM-DD)>, <RemainingUses(int)>
+                        """);
+        //TotalUses will be set to 0 by default.
+
+        String input  = scanner.nextLine().trim();
+        String[] attributes = input.split(",");
+        
+        int currentID = Collections.max(getOrderIDs(dbconn)) + 1;
+        int temp = 0;
+        query = String.format(
+        		"INSERT INTO dylanchapman.LessonPurchase VALUES(%d, '%s', '%s', TO_DATE('%s', 'YYYY-MM-DD'), '%s', 0)",
+        		currentID, //OrderID
+        		attributes[0].trim(), // LessonID
+        		attributes[1].trim(), // MemberID
+        		attributes[2].trim(), //Purchase Time (Date)
+        		attributes[3].trim() // Remaining Uses
+        );
+        
+
+        try {
+        	Statement statement = dbconn.createStatement();
+        	statement.executeUpdate(query);
+            System.out.printf("LessonPurchase ID %d has successfully been registered. \n", currentID);
+        }
+
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
+        
 
     }
 

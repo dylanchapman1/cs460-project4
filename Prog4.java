@@ -810,7 +810,7 @@ public class Prog4 {
         int currentID = Collections.max(getOrderIDs(dbconn)) + 1;
         int temp = 0;
         query = String.format(
-        		"INSERT INTO dylanchapman.LessonPurchase VALUES(%d, '%s', '%s', TO_DATE('%s', 'YYYY-MM-DD'), '%s', 0)",
+        		"INSERT INTO dylanchapman.LessonPurchase VALUES(%d, '%s', '%s', TO_DATE('%s', 'YYYY-MM-DD'), 0, '%s')",
         		currentID, //OrderID
         		attributes[0].trim(), // LessonID
         		attributes[1].trim(), // MemberID

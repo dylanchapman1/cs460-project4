@@ -1178,7 +1178,72 @@ public class Prog4 {
 
     }
 
-    public static void GetOpenIntermediateTrails() {
+    public static void GetOpenIntermediateTrails(Connection dbconn) {
+
+
+        // Because each Lift has a "connected" field which can match a trail's starting point,
+        // We can use this to join tables to recieve only Trail-Lift relations
+        // with these matching points and filter by trails that are
+        // intermediate level (2) AND have both trail and lift in 'Open' Status.
+
+        String query = """
+        SELECT TrailName, Category,
+            LISTAGG(LiftName, ', ') WITHIN GROUP (ORDER BY LiftName) AS ConnectedLifts
+            FROM dylanchapman.Trail
+            JOIN dylanchapman.Lift ON Trail.StartLocation = Lift.Destination
+            WHERE Trail.Difficulty = 2 AND Trail.Status = 'Open' AND Lift.Status = 'Open'
+            GROUP BY TrailName, Category        
+        """;
+
+        // String Length for formatting purposes.
+        // Values are based on Varchar2(x) as defined in DB (with some padding) 
+        final int trailStrLen = 30 + 5;
+        final int catStrLen = 20 + 5;
+        final int liftStrLen = 20;
+
+        try {
+        	Statement statement = dbconn.createStatement();
+            ResultSet result = statement.executeQuery(query);
+
+            ResultSetMetaData resultMetadata = result.getMetaData();
+            int counter = 0;
+
+            // Output Table Headers
+            System.out.println('\n');
+            System.out.print(padRight(resultMetadata.getColumnName(1), trailStrLen));  // TrailName
+            System.out.print(padRight(resultMetadata.getColumnName(2), catStrLen));	// Category   
+            System.out.print(padRight(resultMetadata.getColumnName(3), liftStrLen));	// ConnectedTrails             
+            System.out.println("\n_________________________________________________________________________________\n");
+
+            while(result.next()) {
+                String trailName = result.getString("TrailName");
+                String category = result.getString("Category");
+
+            	String connectedLifts = result.getString("ConnectedLifts");
+                String[] lifts = connectedLifts.split(",\\s*");
+
+                System.out.print(padRight(trailName, trailStrLen));
+                System.out.print(padRight(category, catStrLen));
+
+                for (String lift : lifts){
+                    System.out.print(padRight(lift,liftStrLen));
+                    System.out.print('\n' + padRight("",trailStrLen + catStrLen));
+                }
+
+                System.out.println();
+                counter++;
+            }
+            System.out.printf("\n\nFound %d intermediate trails currently open.\n\n", counter);
+        }
+
+
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
+
 
     }
 
@@ -1186,6 +1251,14 @@ public class Prog4 {
 
     }
 
+    // Helper function for formatting, fills the right of a string
+    // with spaces to reach 'length' total chars.
+    public static String padRight(String str, int length) {
+        if (str.length() >= length) {
+            return str.substring(0, length); // Trim if too long
+        }
+        return String.format("%-" + length + "s", str); // Pad with spaces
+    }
 
     public static void main(String[] args) {
         final String oracleURL = "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
@@ -1356,7 +1429,7 @@ public class Prog4 {
 
                     case 6 -> GetMemberSkiLessonDetails(scanner, dbconn);
                     case 7 -> GetSkiPassUsageDetails(scanner, dbconn);
-                    case 8 -> GetOpenIntermediateTrails();
+                    case 8 -> GetOpenIntermediateTrails(dbconn);
                     case 9 -> CustomQuery();
                 }
 

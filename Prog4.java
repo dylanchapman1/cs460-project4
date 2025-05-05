@@ -1,5 +1,5 @@
 /*
- * Author(s): Dylan Chapman
+ * Author(s): Dylan Chapman, Andrew Hicks, Adam Tilkens
  * Class:     CSC460
  * Date:      5/6/2025
  * Program:   Prog4.java
@@ -13,23 +13,22 @@ import java.util.*;
 // export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${CLASSPATH}
 
 public class Prog4 {
-
-    /*
-    Name: getMenuChoice
-
-    Purpose: Captures a user's input to figure out what query to run
-
-    Pre-Conditions: None
-
-    Post-Conditions: The (final) returned value will always be 1-10
-
-    Parameters:
-    scanner (Scanner): Scanner object to capture user's input
-
-    Returns:
-    integer detailing what query a user wants to run.
-     */
     public static int getMenuChoice(Scanner scanner) {
+            /*
+        Name: getMenuChoice
+
+        Purpose: Captures a user's input to figure out what query to run
+
+        Pre-Conditions: None
+
+        Post-Conditions: The (final) returned value will always be 1-10
+
+        Parameters:
+        scanner (Scanner): Scanner object to capture user's input
+
+        Returns:
+        integer detailing what query a user wants to run.
+        */
         while (true) {
             System.out.println("""
                 Select a query!
@@ -62,6 +61,18 @@ public class Prog4 {
     }
 
     public static ArrayList<Integer> getMemberIDs(Connection dbconn) {
+        /*
+        Name: getMemberIDs
+
+        Purpose: Query all memberIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all memberIDs in the database as ArrayList<Integer>
+        */
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT MEMBERID FROM dylanchapman.MEMBER";
 
@@ -69,8 +80,8 @@ public class Prog4 {
             Statement statement = dbconn.createStatement();
             ResultSet answer = statement.executeQuery(query);
 
-            if (answer != null) {
-                while (answer.next())
+            if(answer != null) {
+                while(answer.next())
                     IDs.add(answer.getInt("MEMBERID"));
             }
         }
@@ -87,13 +98,25 @@ public class Prog4 {
     }
 
     public static ArrayList<Integer> getRentalIDs(Connection dbconn) {
+        /*
+        Name: getRentalIDs
+
+        Purpose: Query all memberIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all rentalIDs in the database as ArrayList<Integer>
+        */
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT RENTALID FROM dylanchapman.EQUIPMENTRENTAL";
-    
+
         try {
             Statement statement = dbconn.createStatement();
             ResultSet answer = statement.executeQuery(query);
-    
+
             if(answer != null) {
                 while(answer.next())
                     IDs.add(answer.getInt("RENTALID"));
@@ -102,18 +125,30 @@ public class Prog4 {
         catch(SQLException e) {
             System.err.println("error: " + e.getMessage());
         }
-    
+
         return IDs;
-    }    
+    }
 
     public static ArrayList<Integer> getItemIDs(Connection dbconn) {
+        /*
+        Name: getItemIDs
+
+        Purpose: Query all itemIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all itemIDs in the database as ArrayList<Integer>
+        */
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT ITEMID FROM dylanchapman.EQUIPMENT";
-    
+
         try {
             Statement statement = dbconn.createStatement();
             ResultSet answer = statement.executeQuery(query);
-    
+
             if(answer != null) {
                 while(answer.next())
                     IDs.add(answer.getInt("ITEMID"));
@@ -122,11 +157,22 @@ public class Prog4 {
         catch(SQLException e) {
             System.err.println("error: " + e.getMessage());
         }
-    
         return IDs;
-    } 
+    }
 
     public static ArrayList<Integer> getPassIDs(Connection dbconn) {
+        /*
+        Name: getPassIDs
+
+        Purpose: Query all passIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all passIDs in the database as ArrayList<Integer>
+        */
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT PASSID FROM dylanchapman.SKIPASS";
 
@@ -150,8 +196,20 @@ public class Prog4 {
 
         return IDs;
     }
-    
+
     public static ArrayList<Integer> getOrderIDs(Connection dbconn) {
+        /*
+        Name: getOrderIDs
+
+        Purpose: Query all OrderIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all OrdersIDs in the database as ArrayList<Integer>
+        */
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT OrderID FROM dylanchapman.LESSONPURCHASE";
 
@@ -177,6 +235,18 @@ public class Prog4 {
     }
 
     public static void addMember(Scanner scanner, Connection dbconn) {
+        /*
+        Name: addMember
+
+        Purpose: Insert a new member record into the database
+
+        Pre-Conditions: Valid DB connection, initialized scanner object
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all itemIDs in the database as ArrayList<Integer>
+        */
         String query;
         System.out.println("""
                         Please add all necessary fields, and SEPARATE THEM WITH COMMAS
@@ -387,9 +457,6 @@ public class Prog4 {
             System.err.println("\tSQLState:  " + e.getSQLState());
             System.err.println("\tErrorCode: " + e.getErrorCode());
         }
-
-
-
     }
 
     public static void addSkiPass(Scanner scanner, Connection dbconn) {
@@ -423,7 +490,7 @@ public class Prog4 {
         int passID = Collections.max(getPassIDs(dbconn)) + 1;
 
         String query = String.format(
-                "INSERT INTO dylanchapman.SkiPass VALUES(%d, %d, %d, %d, TO_DATE('2024-12-31', 'YYYY-MM-DD'), %d)",
+                "INSERT INTO dylanchapman.SkiPass VALUES(%d, %d, %d, %d, TO_DATE('2024-12-31', 'YYYY-MM-DD'), %d, %d)",
                 passID,
                 memberID,
                 skiPassMap.get(selectedPass)[0],
@@ -498,19 +565,19 @@ public class Prog4 {
             System.out.println(i + " " + vals.length);
             while(i < vals.length) {
                 if (i == 2) {
-                        try {
-                                Date sqlDate = Date.valueOf(vals[i]); // YYYY-MM-DD
-                                prep.setDate(i + 1, sqlDate);
-                                i++;
-                        }
-                        catch(IllegalArgumentException e) {
-                                System.out.println("Please use YYYY-MM-DD.");
-                                return;
-                        }
+                    try {
+                        Date sqlDate = Date.valueOf(vals[i]); // YYYY-MM-DD
+                        prep.setDate(i + 1, sqlDate);
+                        i++;
+                    }
+                    catch(IllegalArgumentException e) {
+                        System.out.println("Please use YYYY-MM-DD.");
+                        return;
+                    }
                 }
                 else{
-                        prep.setString(i+1, vals[i]);
-                        i++;
+                    prep.setString(i+1, vals[i]);
+                    i++;
                 }
             }
             prep.setInt(i+1, passID);
@@ -525,8 +592,8 @@ public class Prog4 {
         }
         catch(SQLException e) {
             System.out.println("error: "+ e.getMessage());
-                System.out.println(e.getSQLState());
-                System.out.println(e.getErrorCode());
+            System.out.println(e.getSQLState());
+            System.out.println(e.getErrorCode());
         }
     }
 
@@ -641,12 +708,12 @@ public class Prog4 {
         System.out.println("Please enter the ItemID of the equipment you wish to update:");
         int itemID = scanner.nextInt();
         scanner.nextLine();
-    
+
         if(!getItemIDs(dbconn).contains(itemID)) {
             System.out.println("ItemID does not exist!\n");
             return;
         }
-    
+
         System.out.println("""
                 What type of equipment would you like to change it to (enter the corresponding integer):
                     1. Boots     | Sizes 4.0 to 14.0 (half sizes)
@@ -655,10 +722,10 @@ public class Prog4 {
                     4. Snowboard | Lengths 90 cm to 178 cm
                     5. Helmet    | XS, S, M, L, XL
                 """);
-    
+
         int equipmentType = scanner.nextInt();
         scanner.nextLine();
-    
+
         Map<Integer, String> inputToEquipment = Map.of(
                 1, "BOOTS",
                 2, "POLES",
@@ -666,30 +733,30 @@ public class Prog4 {
                 4, "SNOWBOARD",
                 5, "HELMET"
         );
-    
+
         if(!inputToEquipment.containsKey(equipmentType)) {
             System.out.println("Invalid equipment type selected.");
             return;
         }
-    
+
         System.out.println("Enter the corresponding size for the equipment:");
         String equipmentSize = scanner.nextLine();
-    
+
         String updateQuery = "UPDATE dylanchapman.EQUIPMENT SET EQUIPMENTTYPE = ?, EQUIPMENTSIZE = ? WHERE ITEMID = ?";
-    
+
         try(PreparedStatement prep = dbconn.prepareStatement(updateQuery)) {
             prep.setString(1, inputToEquipment.get(equipmentType));
             prep.setString(2, equipmentSize.toUpperCase());
             prep.setInt(3, itemID);
-    
+
             int count = prep.executeUpdate();
             if(count > 0) {
                 System.out.println("Equipment updated successfully!\n");
-            } 
+            }
             else {
                 System.out.println("No matching record found.\n");
             }
-        } 
+        }
         catch (SQLException e) {
             System.err.println("*** SQLException: Could not update equipment.");
             System.err.println("\tMessage:   " + e.getMessage());
@@ -702,40 +769,40 @@ public class Prog4 {
         System.out.println("Please enter the ItemID of the equipment you wish to archive:");
         int itemID = scanner.nextInt();
         scanner.nextLine();
-    
+
         String rentalCheck = String.format(
-            "SELECT COUNT(*) as current_usage FROM dylanchapman.EQUIPMENTRENTAL " +
-            "WHERE ITEMID = %d AND RETURNSTATUS = 0", itemID
+                "SELECT COUNT(*) as current_usage FROM dylanchapman.EQUIPMENTRENTAL " +
+                        "WHERE ITEMID = %d AND RETURNSTATUS = 0", itemID
         );
-    
+
         try (Statement stmt = dbconn.createStatement();
              ResultSet rs = stmt.executeQuery(rentalCheck)) {
-    
+
             if(rs.next() && rs.getInt("current_usage") > 0) {
                 System.out.println("This equipment is currently rented or reserved and cannot be archived.");
                 return;
             }
-    
-        } 
+
+        }
         catch(SQLException e) {
             System.out.println("SQLError: " + e.getMessage());
             return;
         }
-    
+
         String updateQuery = String.format(
-            "UPDATE dylanchapman.EQUIPMENT SET ACTIVE = 0 WHERE ITEMID = %d", itemID
+                "UPDATE dylanchapman.EQUIPMENT SET ACTIVE = 0 WHERE ITEMID = %d", itemID
         );
-    
+
         try (Statement stmt = dbconn.createStatement()) {
             int count = stmt.executeUpdate(updateQuery);
             if (count > 0) {
                 System.out.printf("Equipment with ItemID %d has been archived successfully.\n", itemID);
-            } 
+            }
             else {
                 System.out.println("Update failed — equipment was not archived.");
             }
-    
-        } 
+
+        }
         catch (SQLException e) {
             System.err.println("*** SQLException: Could not archive equipment.");
             System.err.println("\tMessage:   " + e.getMessage());
@@ -766,19 +833,19 @@ public class Prog4 {
                 System.out.println("That ITEMID does not exist. Try again.");
                 return;
             }
-    
+
             int archived = Integer.parseInt(attributes[3].trim());
 
             String startDate = attributes[4].trim();
             String endDate = attributes[5].trim();
-            
-    
+
+
             query = String.format(
-                "INSERT INTO dylanchapman.EquipmentRental " +
-                "VALUES (%d, %d, %d, %d, %d, TO_TIMESTAMP('%s', 'YYYY-MM-DD'), TO_TIMESTAMP('%s', 'YYYY-MM-DD'))",
-                currentID, passId, returnStatus, itemId, archived, startDate, endDate
+                    "INSERT INTO dylanchapman.EquipmentRental " +
+                            "VALUES (%d, %d, %d, %d, %d, TO_TIMESTAMP('%s', 'YYYY-MM-DD'), TO_TIMESTAMP('%s', 'YYYY-MM-DD'))",
+                    currentID, passId, returnStatus, itemId, archived, startDate, endDate
             );
-    
+
             Statement statement = dbconn.createStatement();
             statement.executeUpdate(query);
             System.out.printf("Rental added successfully! Your rental ID is %d\n\n", currentID);
@@ -789,57 +856,57 @@ public class Prog4 {
             System.err.println("\tSQLState:  " + e.getSQLState());
             System.err.println("\tErrorCode: " + e.getErrorCode());
         }
-        
+
     }
-    
+
     public static void updateEquipmentRental(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the RentalID of the record you wish to update:");
         int rentalID = scanner.nextInt();
         scanner.nextLine();
-    
+
         if(!getRentalIDs(dbconn).contains(rentalID)) {
             System.out.println("RentalID does not exist!\n");
             return;
         }
-    
+
         System.out.println("""
             Please enter the updated values, separated by commas:
             <PassID (int)>, <ReturnStatus (int)>, <ItemID (int)>, <Archived (int)>, <StartDate (YYYY-MM-DD HH:MM:SS)>, <EndDate (YYYY-MM-DD HH:MM:SS)>
         """);
-    
+
         String input = scanner.nextLine().trim();
         String[] attributes = input.split(",");
-    
+
         if(attributes.length != 6) {
             System.out.println("Please provide exactly 6 fields.");
             return;
         }
-    
+
         try {
             int passId = Integer.parseInt(attributes[0].trim());
             if(!getPassIDs(dbconn).contains(passId)) {
                 System.out.println("That PASSID does not exist. Try again.");
                 return;
             }
-    
+
             int returnStatus = Integer.parseInt(attributes[1].trim());
-    
+
             int itemId = Integer.parseInt(attributes[2].trim());
             if(!getItemIDs(dbconn).contains(itemId)) {
                 System.out.println("That ITEMID does not exist. Try again.");
                 return;
             }
-    
+
             int archived = Integer.parseInt(attributes[3].trim());
-    
+
             String startDate = attributes[4].trim();
             String endDate = attributes[5].trim();
-    
+
             String sql = "UPDATE dylanchapman.EQUIPMENTRENTAL SET " +
-                         "PASSID = ?, RETURNSTATUS = ?, ITEMID = ?, ARCHIVED = ?, " +
-                         "STARTDATE = TO_TIMESTAMP(?, 'YYYY-MM-DD HH24:MI:SS'), ENDDATE = TO_TIMESTAMP(?, 'YYYY-MM-DD HH24:MI:SS') " +
-                         "WHERE RENTALID = ?";
-    
+                    "PASSID = ?, RETURNSTATUS = ?, ITEMID = ?, ARCHIVED = ?, " +
+                    "STARTDATE = TO_TIMESTAMP(?, 'YYYY-MM-DD HH24:MI:SS'), ENDDATE = TO_TIMESTAMP(?, 'YYYY-MM-DD HH24:MI:SS') " +
+                    "WHERE RENTALID = ?";
+
             try(PreparedStatement prep = dbconn.prepareStatement(sql)) {
                 prep.setInt(1, passId);
                 prep.setInt(2, returnStatus);
@@ -852,16 +919,16 @@ public class Prog4 {
                 int count = prep.executeUpdate();
                 if(count > 0) {
                     System.out.println("Rental record updated successfully!\n");
-                } 
+                }
                 else {
                     System.out.println("No matching record found.\n");
                 }
             }
-    
-        } 
+
+        }
         catch(NumberFormatException e) {
             System.out.println("Invalid number format in one or more fields. Please try again.");
-        } 
+        }
         catch(SQLException e) {
             System.err.println("*** SQLException: Could not update rental.");
             System.err.println("\tMessage:   " + e.getMessage());
@@ -869,89 +936,89 @@ public class Prog4 {
             System.err.println("\tErrorCode: " + e.getErrorCode());
         }
     }
-    
-    
+
+
 
     public static void deleteEquipmentRental(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the RentalID of the equipment you wish to archive:");
         int rentalID = scanner.nextInt();
         scanner.nextLine();
-    
+
         // Step 1: Get PASSID, ITEMID, STARTDATE, ENDDATE
         String rentalInfoQuery = String.format(
-            "SELECT PASSID, ITEMID, STARTDATE, ENDDATE FROM dylanchapman.EQUIPMENTRENTAL WHERE RENTALID = %d",
-            rentalID
+                "SELECT PASSID, ITEMID, STARTDATE, ENDDATE FROM dylanchapman.EQUIPMENTRENTAL WHERE RENTALID = %d",
+                rentalID
         );
-    
+
         int passId = -1;
         int itemId = -1;
         Timestamp startDate = null;
         Timestamp endDate = null;
-    
+
         try(Statement stmt = dbconn.createStatement();
-             ResultSet rs = stmt.executeQuery(rentalInfoQuery)) {
-    
+            ResultSet rs = stmt.executeQuery(rentalInfoQuery)) {
+
             if(rs.next()) {
                 passId = rs.getInt("PASSID");
                 itemId = rs.getInt("ITEMID");
                 startDate = rs.getTimestamp("STARTDATE");
                 endDate = rs.getTimestamp("ENDDATE");
-            } 
+            }
             else {
                 System.out.println("No rental found with that RentalID.");
                 return;
             }
-    
-        } 
+
+        }
         catch(SQLException e) {
             System.err.println("Error retrieving rental details: " + e.getMessage());
             return;
         }
-    
+
         String usageCheckQuery = String.format(
-            "SELECT COUNT(*) AS usage_count FROM dylanchapman.LIFTUSAGE " +
-            "WHERE PASSID = %d AND TIME BETWEEN TO_TIMESTAMP('%s', 'YYYY-MM-DD HH24:MI:SS') " +
-            "AND TO_TIMESTAMP('%s', 'YYYY-MM-DD HH24:MI:SS')",
-            passId,
-            startDate.toString().substring(0, 19),
-            endDate.toString().substring(0, 19)
+                "SELECT COUNT(*) AS usage_count FROM dylanchapman.LIFTUSAGE " +
+                        "WHERE PASSID = %d AND TIME BETWEEN TO_TIMESTAMP('%s', 'YYYY-MM-DD HH24:MI:SS') " +
+                        "AND TO_TIMESTAMP('%s', 'YYYY-MM-DD HH24:MI:SS')",
+                passId,
+                startDate.toString().substring(0, 19),
+                endDate.toString().substring(0, 19)
         );
-    
+
         try(Statement stmt = dbconn.createStatement()) {
             ResultSet rs = stmt.executeQuery(usageCheckQuery);
-    
+
             if(rs.next() && rs.getInt("usage_count") > 0) {
                 System.out.println("This rental has lift usage and cannot be archived.");
                 return;
             }
-    
+
         } catch (SQLException e) {
             System.err.println("Error checking lift usage: " + e.getMessage());
             return;
         }
 
         String archiveQuery = String.format(
-            "UPDATE dylanchapman.EQUIPMENTRENTAL SET ARCHIVED = 1 WHERE RENTALID = %d",
-            rentalID
+                "UPDATE dylanchapman.EQUIPMENTRENTAL SET ARCHIVED = 1 WHERE RENTALID = %d",
+                rentalID
         );
-    
+
         try(Statement stmt = dbconn.createStatement()) {
             int rows = stmt.executeUpdate(archiveQuery);
             if(rows > 0) {
                 System.out.printf("Rental with RentalID %d archived successfully.\n", rentalID);
-            } 
+            }
             else {
                 System.out.println("Archiving failed — no rows were updated.");
             }
-    
-        } 
+
+        }
         catch (SQLException e) {
             System.err.println("Error archiving rental: " + e.getMessage());
         }
     }
 
     public static void addLessonPurchase(Scanner scanner, Connection dbconn) {
-    	String query;
+        String query;
         System.out.println("""
                         Please add all necessary fields, and SEPARATE THEM WITH COMMAS
                         <LessonID (int)>, <MemberID> (int), <PurchaseDate (YYYY-MM-DD)>, <RemainingUses(int)>
@@ -960,22 +1027,22 @@ public class Prog4 {
 
         String input  = scanner.nextLine().trim();
         String[] attributes = input.split(",");
-        
+
         int currentID = Collections.max(getOrderIDs(dbconn)) + 1;
         int temp = 0;
         query = String.format(
-        		"INSERT INTO dylanchapman.LessonPurchase VALUES(%d, '%s', '%s', TO_DATE('%s', 'YYYY-MM-DD'), 0, '%s')",
-        		currentID, // OrderID - PK
-        		attributes[0].trim(), // LessonID
-        		attributes[1].trim(), // MemberID
-        		attributes[2].trim(), //Purchase Time (Date)
-        		attributes[3].trim() // Remaining Uses
+                "INSERT INTO dylanchapman.LessonPurchase VALUES(%d, '%s', '%s', TO_DATE('%s', 'YYYY-MM-DD'), 0, '%s')",
+                currentID, // OrderID - PK
+                attributes[0].trim(), // LessonID
+                attributes[1].trim(), // MemberID
+                attributes[2].trim(), //Purchase Time (Date)
+                attributes[3].trim() // Remaining Uses
         );
-        
+
 
         try {
-        	Statement statement = dbconn.createStatement();
-        	statement.executeUpdate(query);
+            Statement statement = dbconn.createStatement();
+            statement.executeUpdate(query);
             System.out.printf("LessonPurchase ID %d has successfully been registered. \n", currentID);
         }
 
@@ -985,12 +1052,12 @@ public class Prog4 {
             System.err.println("\tSQLState:  " + e.getSQLState());
             System.err.println("\tErrorCode: " + e.getErrorCode());
         }
-        
+
 
     }
 
     public static void updateLessonPurchase(Scanner scanner, Connection dbconn) {
-    	System.out.println("Please enter the Lesson OrderID to be updated:");
+        System.out.println("Please enter the Lesson OrderID to be updated:");
         int orderID = scanner.nextInt();
         scanner.nextLine(); // I'm pretty sure we need this
 
@@ -1009,14 +1076,14 @@ public class Prog4 {
         String[] attributes = input.split(",");
 
         query = String.format(
-        		"UPDATE dylanchapman.LessonPurchase SET LessonID = '%s', MemberID = '%s', PurchaseDate = TO_DATE('%s', 'YYYY-MM-DD'), "
-        		+ "TotalUses = '%s', RemainingUses = '%s' WHERE OrderID = '%d'",        		
-        		attributes[0].trim(), // LessonID
-        		attributes[1].trim(), // MemberID
-        		attributes[2].trim(), // Purchase Time (Date)
-        		attributes[3].trim(), // Total Uses
-        		attributes[4].trim(), // Remaining Uses
-        		orderID // OrderID
+                "UPDATE dylanchapman.LessonPurchase SET LessonID = '%s', MemberID = '%s', PurchaseDate = TO_DATE('%s', 'YYYY-MM-DD'), "
+                        + "TotalUses = '%s', RemainingUses = '%s' WHERE OrderID = '%d'",
+                attributes[0].trim(), // LessonID
+                attributes[1].trim(), // MemberID
+                attributes[2].trim(), // Purchase Time (Date)
+                attributes[3].trim(), // Total Uses
+                attributes[4].trim(), // Remaining Uses
+                orderID // OrderID
         );
 
         try {
@@ -1034,41 +1101,41 @@ public class Prog4 {
     }
 
     public static void deleteLessonPurchase(Scanner scanner, Connection dbconn) {
-    	System.out.println("Please enter the LessonPurchase OrderID to be deleted.");
+        System.out.println("Please enter the LessonPurchase OrderID to be deleted.");
         int orderID = scanner.nextInt();
         scanner.nextLine();
 
         if (!getOrderIDs(dbconn).contains(orderID)) {
             System.out.println("No such OrderID within LessonPurchase!\n");
-            return;        
+            return;
         }
         String queryGet = String.format(
-        		"SELECT * FROM dylanchapman.lessonpurchase WHERE OrderID = '%s' ", orderID);
-        
+                "SELECT * FROM dylanchapman.lessonpurchase WHERE OrderID = '%s' ", orderID);
+
         String queryDelete = String.format(
-        		"DELETE FROM dylanchapman.lessonpurchase WHERE OrderID = '%s'", orderID);
-        
+                "DELETE FROM dylanchapman.lessonpurchase WHERE OrderID = '%s'", orderID);
+
         try {
             Statement statement = dbconn.createStatement();
             ResultSet result = statement.executeQuery(queryGet);
             int fetchedTotalUses = -1;
             if(result.next()) {
-            	fetchedTotalUses = result.getInt("TotalUses");
+                fetchedTotalUses = result.getInt("TotalUses");
             }
             System.out.println("Retrieved TotalUse value: " + fetchedTotalUses);
 
             // We can ONLY delete a LessonPurchase record if TotalUses = 0 (unused)
             if (fetchedTotalUses == 0) {
-            	statement.executeUpdate(queryDelete);            	
+                statement.executeUpdate(queryDelete);
             }else {
-            	System.out.printf("The Lesson Purchase OrderID #%s has '%s' use(s), so cannot be deleted.\n\n",
-            			orderID, fetchedTotalUses);
-            	return;
-            }     
-            
-            
+                System.out.printf("The Lesson Purchase OrderID #%s has '%s' use(s), so cannot be deleted.\n\n",
+                        orderID, fetchedTotalUses);
+                return;
+            }
+
+
             System.out.printf("Lesson Purchase Order ID %d has been succesfully deleted.\n\n", orderID);
-        }   
+        }
 
         catch (SQLException e) {
             System.err.println("*** SQLException: Could not fetch query results.");
@@ -1178,14 +1245,136 @@ public class Prog4 {
 
     }
 
-    public static void GetOpenIntermediateTrails() {
+    public static void GetOpenIntermediateTrails(Connection dbconn) {
+
+
+        // Because each Lift has a "connected" field which can match a trail's starting point,
+        // We can use this to join tables to recieve only Trail-Lift relations
+        // with these matching points and filter by trails that are
+        // intermediate level (2) AND have both trail and lift in 'Open' Status.
+
+        String query = """
+        SELECT TrailName, Category,
+            LISTAGG(LiftName, ', ') WITHIN GROUP (ORDER BY LiftName) AS ConnectedLifts
+            FROM dylanchapman.Trail
+            JOIN dylanchapman.Lift ON Trail.StartLocation = Lift.Destination
+            WHERE Trail.Difficulty = 2 AND Trail.Status = 'Open' AND Lift.Status = 'Open'
+            GROUP BY TrailName, Category        
+        """;
+
+        // String Length for formatting purposes.
+        // Values are based on Varchar2(x) as defined in DB (with some padding)
+        final int trailStrLen = 30 + 5;
+        final int catStrLen = 20 + 5;
+        final int liftStrLen = 20;
+
+        try {
+            Statement statement = dbconn.createStatement();
+            ResultSet result = statement.executeQuery(query);
+
+            ResultSetMetaData resultMetadata = result.getMetaData();
+            int counter = 0;
+
+            // Output Table Headers
+            System.out.println('\n');
+            System.out.print(padRight(resultMetadata.getColumnName(1), trailStrLen));  // TrailName
+            System.out.print(padRight(resultMetadata.getColumnName(2), catStrLen));	// Category
+            System.out.print(padRight(resultMetadata.getColumnName(3), liftStrLen));	// ConnectedTrails
+            System.out.println("\n_________________________________________________________________________________\n");
+
+            while(result.next()) {
+                String trailName = result.getString("TrailName");
+                String category = result.getString("Category");
+
+                String connectedLifts = result.getString("ConnectedLifts");
+                String[] lifts = connectedLifts.split(",\\s*");
+
+                System.out.print(padRight(trailName, trailStrLen));
+                System.out.print(padRight(category, catStrLen));
+
+                for (String lift : lifts){
+                    System.out.print(padRight(lift,liftStrLen));
+                    System.out.print('\n' + padRight("",trailStrLen + catStrLen));
+                }
+
+                System.out.println();
+                counter++;
+            }
+            System.out.printf("\n\nFound %d intermediate trails currently open.\n\n", counter);
+        }
+
+
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
+
 
     }
 
-    public static void CustomQuery() {
+    public static void CustomQuery(Scanner scanner, Connection dbconn) {
+        System.out.println("Please enter your desired price:");
+        int price = scanner.nextInt();
+        scanner.nextLine(); // I'm pretty sure we need this
 
+        String query = String.format("""
+        SELECT m.memberID, 
+        m.name, 
+        m.email, 
+        sp.passID, 
+        sp.price, 
+        sp.remainingUses, 
+        er.rentalID, 
+        er.startdate, 
+        e.type, 
+        e.itemsize 
+        FROM dylanchapman.Member m 
+        JOIN dylanchapman.SkiPass sp ON m.memberID = sp.memberID 
+        JOIN dylanchapman.EquipmentRental er ON sp.passID = er.passID 
+        JOIN dylanchapman.Equipment e ON er.itemID = e.itemID 
+        WHERE sp.price > %d       
+        """, price);
+
+        try {
+            Statement statement = dbconn.createStatement();
+            ResultSet result = statement.executeQuery(query);
+
+            ResultSetMetaData resultMetadata = result.getMetaData();
+
+            while(result.next()) {
+                int memberID = result.getInt("memberID");
+                String name = result.getString("name");
+                String email = result.getString("email");
+                int passID = result.getInt("passID");
+                int passPrice = result.getInt("price");
+                int remainingUses = result.getInt("remainingUses");
+                int rentalID = result.getInt("rentalID");
+                Timestamp startDate = result.getTimestamp("startdate");
+                String equipmentType = result.getString("type");
+                String equipmentSize = result.getString("itemsize");
+
+                System.out.println("%-10d, %-30s, %-30s, %-10d, %-10d, %-10d, %-10d, %-20s, %-20s, %-20s".formatted(
+                        memberID, name, email, passID, passPrice, remainingUses, rentalID, startDate.toString(), equipmentType, equipmentSize));
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
     }
 
+    // Helper function for formatting, fills the right of a string
+    // with spaces to reach 'length' total chars.
+    public static String padRight(String str, int length) {
+        if (str.length() >= length) {
+            return str.substring(0, length); // Trim if too long
+        }
+        return String.format("%-" + length + "s", str); // Pad with spaces
+    }
 
     public static void main(String[] args) {
         final String oracleURL = "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
@@ -1356,8 +1545,8 @@ public class Prog4 {
 
                     case 6 -> GetMemberSkiLessonDetails(scanner, dbconn);
                     case 7 -> GetSkiPassUsageDetails(scanner, dbconn);
-                    case 8 -> GetOpenIntermediateTrails();
-                    case 9 -> CustomQuery();
+                    case 8 -> GetOpenIntermediateTrails(dbconn);
+                    case 9 -> CustomQuery(scanner, dbconn);
                 }
 
                 statement.close();
@@ -1371,7 +1560,5 @@ public class Prog4 {
             System.err.println("\tErrorCode: " + e.getErrorCode());
             System.exit(-1);
         }
-
-
     }
 }

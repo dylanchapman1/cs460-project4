@@ -218,8 +218,9 @@ public class Prog4 {
             ResultSet answer = statement.executeQuery(query);
 
             if (answer != null) {
-                while (answer.next())
+                while (answer.next()) {
                     IDs.add(answer.getInt("ORDERID"));
+                }
             }
         }
         catch (SQLException e) {
@@ -230,7 +231,6 @@ public class Prog4 {
             System.exit(-1);
 
         }
-
         return IDs;
     }
 
@@ -248,7 +248,7 @@ public class Prog4 {
         Returns: Returns a list of all LessonIDs in the database as ArrayList<Integer>
         */
         ArrayList<Integer> IDs = new ArrayList<>();
-        String query = "SELECT OrderID FROM dylanchapman.LESSON";
+        String query = "SELECT LessonID FROM dylanchapman.LESSON";
 
         try {
             Statement statement = dbconn.createStatement();

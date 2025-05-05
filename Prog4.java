@@ -13,8 +13,7 @@ import java.util.*;
 // export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${CLASSPATH}
 
 public class Prog4 {
-    public static int getMenuChoice(Scanner scanner) {
-            /*
+    /*
         Name: getMenuChoice
 
         Purpose: Captures a user's input to figure out what query to run
@@ -29,6 +28,7 @@ public class Prog4 {
         Returns:
         integer detailing what query a user wants to run.
         */
+    public static int getMenuChoice(Scanner scanner) {
         while (true) {
             System.out.println("""
                 Select a query!
@@ -60,8 +60,7 @@ public class Prog4 {
         }
     }
 
-    public static ArrayList<Integer> getMemberIDs(Connection dbconn) {
-        /*
+    /*
         Name: getMemberIDs
 
         Purpose: Query all memberIDs from the database for validation
@@ -73,6 +72,7 @@ public class Prog4 {
 
         Returns: Returns a list of all memberIDs in the database as ArrayList<Integer>
         */
+    public static ArrayList<Integer> getMemberIDs(Connection dbconn) {
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT MEMBERID FROM dylanchapman.MEMBER";
 
@@ -97,8 +97,7 @@ public class Prog4 {
         return IDs;
     }
 
-    public static ArrayList<Integer> getRentalIDs(Connection dbconn) {
-        /*
+    /*
         Name: getRentalIDs
 
         Purpose: Query all memberIDs from the database for validation
@@ -110,6 +109,7 @@ public class Prog4 {
 
         Returns: Returns a list of all rentalIDs in the database as ArrayList<Integer>
         */
+    public static ArrayList<Integer> getRentalIDs(Connection dbconn) {
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT RENTALID FROM dylanchapman.EQUIPMENTRENTAL";
 
@@ -129,8 +129,7 @@ public class Prog4 {
         return IDs;
     }
 
-    public static ArrayList<Integer> getItemIDs(Connection dbconn) {
-        /*
+    /*
         Name: getItemIDs
 
         Purpose: Query all itemIDs from the database for validation
@@ -142,6 +141,8 @@ public class Prog4 {
 
         Returns: Returns a list of all itemIDs in the database as ArrayList<Integer>
         */
+    public static ArrayList<Integer> getItemIDs(Connection dbconn) {
+
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT ITEMID FROM dylanchapman.EQUIPMENT";
 
@@ -160,8 +161,7 @@ public class Prog4 {
         return IDs;
     }
 
-    public static ArrayList<Integer> getPassIDs(Connection dbconn) {
-        /*
+    /*
         Name: getPassIDs
 
         Purpose: Query all passIDs from the database for validation
@@ -173,6 +173,7 @@ public class Prog4 {
 
         Returns: Returns a list of all passIDs in the database as ArrayList<Integer>
         */
+    public static ArrayList<Integer> getPassIDs(Connection dbconn) {
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT PASSID FROM dylanchapman.SKIPASS";
 
@@ -197,8 +198,7 @@ public class Prog4 {
         return IDs;
     }
 
-    public static ArrayList<Integer> getOrderIDs(Connection dbconn) {
-        /*
+    /*
         Name: getOrderIDs
 
         Purpose: Query all OrderIDs from the database for validation
@@ -210,8 +210,46 @@ public class Prog4 {
 
         Returns: Returns a list of all OrdersIDs in the database as ArrayList<Integer>
         */
+    public static ArrayList<Integer> getOrderIDs(Connection dbconn) {
         ArrayList<Integer> IDs = new ArrayList<>();
-        String query = "SELECT OrderID FROM dylanchapman.LESSONPURCHASE";
+        String query = "SELECT ORDERID FROM dylanchapman.LESSONPURCHASE";
+
+        try {
+            Statement statement = dbconn.createStatement();
+            ResultSet answer = statement.executeQuery(query);
+
+            if (answer != null) {
+                while (answer.next()) {
+                    IDs.add(answer.getInt("ORDERID"));
+                }
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+            System.exit(-1);
+
+        }
+        return IDs;
+    }
+
+    /*
+        Name: getLessonIDs
+
+        Purpose: Query all LessonIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all LessonIDs in the database as ArrayList<Integer>
+        */
+    public static ArrayList<Integer> getLessonIDs(Connection dbconn) {
+        ArrayList<Integer> IDs = new ArrayList<>();
+        String query = "SELECT LessonID FROM dylanchapman.LESSON";
 
         try {
             Statement statement = dbconn.createStatement();
@@ -219,7 +257,7 @@ public class Prog4 {
 
             if (answer != null) {
                 while (answer.next())
-                    IDs.add(answer.getInt("ORDERID"));
+                    IDs.add(answer.getInt("LESSONID"));
             }
         }
         catch (SQLException e) {
@@ -234,19 +272,19 @@ public class Prog4 {
         return IDs;
     }
 
-    public static void addMember(Scanner scanner, Connection dbconn) {
-        /*
-        Name: addMember
+    /*
+    Name: addMember
 
-        Purpose: Insert a new member record into the database
+    Purpose: Insert a new member record into the database
 
-        Pre-Conditions: Valid DB connection, initialized scanner object
+    Pre-Conditions: Valid DB connection, initialized scanner object
 
-        Parameters:
-        dbconn (Connection): Connection to oracle database
+    Parameters:
+    dbconn (Connection): Connection to oracle database
 
-        Returns: Returns a list of all itemIDs in the database as ArrayList<Integer>
+    Returns: None, as the method is void
         */
+    public static void addMember(Scanner scanner, Connection dbconn) {
         String query;
         System.out.println("""
                         Please add all necessary fields, and SEPARATE THEM WITH COMMAS
@@ -281,6 +319,18 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: updateMember
+
+    Purpose: Updates an existing member record in the database
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: Returns: None, as the method is void
+    */
     public static void updateMember(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the MemberID of the user you wish to update:");
         int memberID = scanner.nextInt();
@@ -301,7 +351,7 @@ public class Prog4 {
         String[] attributes = input.split(",");
 
         query = String.format(
-                "UPDATE dylanchapman.Member SET PHONENO = %d, EMAIL = '%s', EMERGENCYCONTACTNUMBER = %d WHERE MEMBERID = %d",
+                "UPDATE dylanchapman.Member SET PHONENUMBER = %d, EMAIL = '%s', EMERGENCYCONTACTNUMBER = %d WHERE MEMBERID = %d",
                 Long.parseLong(attributes[0]),
                 attributes[1].trim(),
                 Long.parseLong(attributes[2].trim()),
@@ -322,6 +372,20 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: deleteMember
+
+    Purpose: Deletes a member from the DB, making sure that before deletion no
+             existing datac like skip passes or lessons are active for the given
+             user
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: Returns: None, as the method is void
+    */
     public static void deleteMember(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the MemberID of the user you wish to update:");
         int memberID = scanner.nextInt();
@@ -459,6 +523,18 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: addSkiPass
+
+    Purpose: Insert a new ski pass record into the database
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: None, as the method is void
+    */
     public static void addSkiPass(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the MemberID of the user you wish to buy a Ski Pass for:");
         int memberID = scanner.nextInt();
@@ -490,7 +566,7 @@ public class Prog4 {
         int passID = Collections.max(getPassIDs(dbconn)) + 1;
 
         String query = String.format(
-                "INSERT INTO dylanchapman.SkiPass VALUES(%d, %d, %d, %d, TO_DATE('2024-12-31', 'YYYY-MM-DD'), %d, %d)",
+                "INSERT INTO dylanchapman.SkiPass VALUES(%d, %d, %d, %d, TO_DATE('2025-12-31', 'YYYY-MM-DD'), %d, %d)",
                 passID,
                 memberID,
                 skiPassMap.get(selectedPass)[0],
@@ -515,15 +591,25 @@ public class Prog4 {
 
     }
 
+    /*
+    Name: updateSkiPass
+
+    Purpose: Updates a ski pass record from the database, in cases of usage at
+             a resort, an incorrect usage deduction, or just manually overriding
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: None, as the method is void
+    */
     public static void updateSkiPass(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the PassID of the user you wish to update a Ski Pass for:");
         int passID = scanner.nextInt();
-
-        System.out.println("Please enter the MemberID of the user you wish to update a skipass for:");
-        int memberID = scanner.nextInt();
         scanner.nextLine();
-        if(!getMemberIDs(dbconn).contains(memberID) || !getPassIDs(dbconn).contains(passID)) {
-            System.out.println("PassID/MemberID foes not exist!\n");
+        if(!getPassIDs(dbconn).contains(passID)) {
+            System.out.println("PassID does not exist!\n");
             return;
         }
 
@@ -538,7 +624,6 @@ public class Prog4 {
             return;
         }
         cols.remove("PASSID");
-        cols.remove("MEMBERID");
 
         String sql = "update dylanchapman.SKIPASS SET ";
         String[] vals = new String[cols.size()];
@@ -549,6 +634,14 @@ public class Prog4 {
             System.out.println("Enter a new value for " + col + ": ");
             vals[i] = scanner.nextLine();
 
+            if(i == 0) {
+                ArrayList<Integer> memIds = getMemberIDs(dbconn);
+                if(!memIds.contains(Integer.parseInt(vals[i]))) {
+                    System.out.println("MemberID does not exist!\n");
+                    return;
+                }
+            }
+
             sql += col + " = ?";
             if(i < cols.size()-1) {
                 sql += ", ";
@@ -557,14 +650,13 @@ public class Prog4 {
             i++;
         }
 
-        sql += " where passid = ?  and memberid = ?";
+        sql += " where passid = ?";
 
         try {
             PreparedStatement prep = dbconn.prepareStatement(sql);
             i = 0;
-            System.out.println(i + " " + vals.length);
             while(i < vals.length) {
-                if (i == 2) {
+                if (i == 3) {
                     try {
                         Date sqlDate = Date.valueOf(vals[i]); // YYYY-MM-DD
                         prep.setDate(i + 1, sqlDate);
@@ -581,7 +673,6 @@ public class Prog4 {
                 }
             }
             prep.setInt(i+1, passID);
-            prep.setInt(i+2, memberID);
             int count = prep.executeUpdate();
             if(count > 0) {
                 System.out.println("Ski pass updated");
@@ -597,6 +688,19 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: deleteSkiPass
+
+    Purpose: Deletes a ski pass from the DB, making sure that before deletion,
+             the ski pass has either expired, or has no remaining uses left
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: Returns: None, as the method is void
+    */
     public static void deleteSkiPass(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the PassID of the user you wish to delete a Ski Pass for:");
         int passID = scanner.nextInt();
@@ -658,6 +762,20 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: addEquipmentInventory
+
+    Purpose: Insert a new equipment piece into the database. When doing so, the
+             piece of equipment must align with its sizing chart. While there is
+             no error checking for this, it still must be adhered to
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: None, as the method is void
+    */
     public static void addEquipmentInventory(Scanner scanner, Connection dbconn) {
         // Assume an admin-only function for now
         System.out.println("""
@@ -704,6 +822,21 @@ public class Prog4 {
 
     }
 
+    /*
+    Name: updateEquipmentInventory
+
+    Purpose: Updates an equipment piece in the ski resort the DB, in case of
+    reclassification, mislabeling, or reassignment to a different size. Like its
+    'add' counterpart, changing a piece of equipment still needs to adhere to type
+    safety to ensure consistency in the DB
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: Returns: None, as the method is void
+    */
     public static void updateEquipmentInventory(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the ItemID of the equipment you wish to update:");
         int itemID = scanner.nextInt();
@@ -742,12 +875,15 @@ public class Prog4 {
         System.out.println("Enter the corresponding size for the equipment:");
         String equipmentSize = scanner.nextLine();
 
-        String updateQuery = "UPDATE dylanchapman.EQUIPMENT SET EQUIPMENTTYPE = ?, EQUIPMENTSIZE = ? WHERE ITEMID = ?";
+        String updateQuery = "UPDATE dylanchapman.EQUIPMENT SET TYPE = ?, ITEMSIZE = ?, RENTED = ?, ACTIVE = ? WHERE ITEMID = ?";
 
         try(PreparedStatement prep = dbconn.prepareStatement(updateQuery)) {
+
             prep.setString(1, inputToEquipment.get(equipmentType));
             prep.setString(2, equipmentSize.toUpperCase());
-            prep.setInt(3, itemID);
+            prep.setInt(3,0);
+            prep.setInt(4, 1);
+            prep.setInt(5, itemID);
 
             int count = prep.executeUpdate();
             if(count > 0) {
@@ -765,6 +901,19 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: deleteEquipmentInventory
+
+    Purpose: Deletes an equipment listing from the DB, making sure that it is
+             still archived for record-keeping purposes
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: Returns: None, as the method is void
+    */
     public static void deleteEquipmentInventory(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the ItemID of the equipment you wish to archive:");
         int itemID = scanner.nextInt();
@@ -809,6 +958,19 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: addEquipmentRental
+
+    Purpose: Insert a new equipment rental record into the database, making sure
+             that whoever wants this equipment actually exists in the resort system
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: None, as the method is void
+    */
     public static void addEquipmentRental(Scanner scanner, Connection dbconn) {
         String query;
         System.out.println("""
@@ -859,6 +1021,20 @@ public class Prog4 {
 
     }
 
+    /*
+    Name: addEquipmentRental
+
+    Purpose: Updates an equipment rental record from the database, by having an
+             admin enter all quantifying information. Updates can also change the
+             return status when a piece of equipment is returned
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: None, as the method is void
+    */
     public static void updateEquipmentRental(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the RentalID of the record you wish to update:");
         int rentalID = scanner.nextInt();
@@ -915,7 +1091,6 @@ public class Prog4 {
                 prep.setString(5, startDate);
                 prep.setString(6, endDate);
                 prep.setInt(7, rentalID);
-                System.out.println("Prepared statement created successfully, uploading");
                 int count = prep.executeUpdate();
                 if(count > 0) {
                     System.out.println("Rental record updated successfully!\n");
@@ -937,8 +1112,20 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: deleteEquipmentRental
 
+    Purpose: Deletes an equipment rental record from the DB, only if the record
+             was spuriously created AND the equipment is not being used. All
+             updates and deletions will be logged
 
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: Returns: None, as the method is void
+    */
     public static void deleteEquipmentRental(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the RentalID of the equipment you wish to archive:");
         int rentalID = scanner.nextInt();
@@ -1017,6 +1204,20 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: addLessonPurchase
+
+    Purpose: Inserts a new lesson rental record into the database, making sure
+             that whoever tried to buy this lesson actually exists in the resort
+             system
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: None, as the method is void
+    */
     public static void addLessonPurchase(Scanner scanner, Connection dbconn) {
         String query;
         System.out.println("""
@@ -1025,11 +1226,22 @@ public class Prog4 {
                         """);
         //TotalUses will be set to 0 by default.
 
-        String input  = scanner.nextLine().trim();
+        String input = scanner.nextLine().trim();
         String[] attributes = input.split(",");
 
+        ArrayList<Integer> lessonIDs = getLessonIDs(dbconn);
+        if(!lessonIDs.contains(Integer.parseInt(attributes[0].trim()))) {
+            System.out.println("That LessonID does not exist. Try again.");
+            return;
+        }
+
+        ArrayList<Integer> memIDs = getMemberIDs(dbconn);
+        if(!memIDs.contains(Integer.parseInt(attributes[1].trim()))) {
+            System.out.println("That MemberID does not exist. Try again.");
+            return;
+        }
+
         int currentID = Collections.max(getOrderIDs(dbconn)) + 1;
-        int temp = 0;
         query = String.format(
                 "INSERT INTO dylanchapman.LessonPurchase VALUES(%d, '%s', '%s', TO_DATE('%s', 'YYYY-MM-DD'), 0, '%s')",
                 currentID, // OrderID - PK
@@ -1056,6 +1268,20 @@ public class Prog4 {
 
     }
 
+    /*
+    Name: updateLessonPurchase
+
+    Purpose: Updates a  lesson rental record from the database, by having an admin
+             reenter all important credentials. Updates reflect usage or
+             adjustments to the purchase
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: None, as the method is void
+    */
     public static void updateLessonPurchase(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the Lesson OrderID to be updated:");
         int orderID = scanner.nextInt();
@@ -1074,6 +1300,18 @@ public class Prog4 {
 
         String input  = scanner.nextLine().trim();
         String[] attributes = input.split(",");
+
+        ArrayList<Integer> lessonIDs = getLessonIDs(dbconn);
+        if(!lessonIDs.contains(Integer.parseInt(attributes[0].trim()))) {
+            System.out.println("That LessonID does not exist. Try again.");
+            return;
+        }
+
+        ArrayList<Integer> memIDs = getMemberIDs(dbconn);
+        if(!memIDs.contains(Integer.parseInt(attributes[1].trim()))) {
+            System.out.println("That MemberID does not exist. Try again.");
+            return;
+        }
 
         query = String.format(
                 "UPDATE dylanchapman.LessonPurchase SET LessonID = '%s', MemberID = '%s', PurchaseDate = TO_DATE('%s', 'YYYY-MM-DD'), "
@@ -1100,6 +1338,19 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: deleteLessonPurchase
+
+    Purpose: Deletes a lesson purchase record from the DB, only if no lessons
+             have been used by the purchaser
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: Returns: None, as the method is void
+    */
     public static void deleteLessonPurchase(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the LessonPurchase OrderID to be deleted.");
         int orderID = scanner.nextInt();
@@ -1145,6 +1396,20 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: GetMemberSkiLessonDetails
+
+    Purpose: Lists all the ski lessons a particular member has purchased,
+             including the # of remaining sessions, instructor name, and
+             scheduled time of said lessons
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: Returns: None, as the method is void
+    */
     public static void GetMemberSkiLessonDetails(Scanner scanner, Connection dbconn) {
         System.out.println("Enter a memberID:");
         int memberID = scanner.nextInt();
@@ -1186,6 +1451,19 @@ public class Prog4 {
         }
     }
 
+    /*
+    Name: GetSkiPassUsageDetails
+
+    Purpose: For a given ski pass, list all lift rides and equipment rentals
+             associated with it, along with timestamps and return status
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: Returns: None, as the method is void
+    */
     public static void GetSkiPassUsageDetails(Scanner scanner, Connection dbconn) {
         System.out.println("Enter a passID (Your ID for your Ski Pass:");
         int passID = scanner.nextInt();
@@ -1197,7 +1475,7 @@ public class Prog4 {
         }
 
         String query1 = String.format("SELECT passID, liftName, time FROM dylanchapman.LiftUsage WHERE passID = %d", passID);
-        String query2 = String.format("SELECT rentalID, itemID, rentalDate, returnStatus FROM dylanchapman.EquipmentRental WHERE passID = %d", passID);
+        String query2 = String.format("SELECT rentalID, itemID, returnStatus FROM dylanchapman.EquipmentRental WHERE passID = %d", passID);
 
         Statement statement1, statement2;
         ResultSet answer1, answer2;
@@ -1230,7 +1508,7 @@ public class Prog4 {
                 System.out.println();
 
                 while (answer2.next())
-                    System.out.println("\t" + answer2.getObject("rentalID") + "\t\t" + answer2.getObject("itemID") + "\t" + answer2.getString("rentalDate").split(" ")[0] + "\t" + answer2.getObject("returnStatus"));
+                    System.out.println("\t" + answer2.getObject("rentalID") + "\t\t" + answer2.getObject("itemID") + "\t" + answer2.getObject("returnStatus"));
 
                 System.out.println();
             }
@@ -1245,9 +1523,20 @@ public class Prog4 {
 
     }
 
+    /*
+    Name: GetOpenIntermediateTrails
+
+    Purpose: List all open trails suitable for intermediate-level skiers, along
+             with their category and connected lifts that are currently operational
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: Returns: None, as the method is void
+    */
     public static void GetOpenIntermediateTrails(Connection dbconn) {
-
-
         // Because each Lift has a "connected" field which can match a trail's starting point,
         // We can use this to join tables to recieve only Trail-Lift relations
         // with these matching points and filter by trails that are
@@ -1314,6 +1603,23 @@ public class Prog4 {
 
     }
 
+    /*
+    Name: CustomQuery
+
+    Purpose: Find all members who have rented equipment AND purchased a ski pass
+             with a price greater than some threshold (the provided value), along
+             with the details of their equipment rentals and ski pass
+             information. The idea is that this query will provide insight into
+             "big spenders" at the resort, and incentivize them to spend more
+             w/ coupons or promotions
+
+    Pre-Conditions: Valid DB connection, initialized scanner object
+
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+
+    Returns: Returns: None, as the method is void
+    */
     public static void CustomQuery(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter your desired price:");
         int price = scanner.nextInt();
@@ -1342,6 +1648,10 @@ public class Prog4 {
             ResultSet result = statement.executeQuery(query);
 
             ResultSetMetaData resultMetadata = result.getMetaData();
+            System.out.printf("%-10s %-30s %-30s %-10s %-10s %-10s %-10s %-20s %-20s %-10s%n",
+                    "MemberID", "Name", "Email", "PassID", "Price", "RemUses", "RentalID",
+                    "StartDate", "EquipType", "Size");
+            System.out.println("---------------------------------------------------------------------------------------------------------------------------");
 
             while(result.next()) {
                 int memberID = result.getInt("memberID");
@@ -1355,8 +1665,9 @@ public class Prog4 {
                 String equipmentType = result.getString("type");
                 String equipmentSize = result.getString("itemsize");
 
-                System.out.println("%-10d, %-30s, %-30s, %-10d, %-10d, %-10d, %-10d, %-20s, %-20s, %-20s".formatted(
-                        memberID, name, email, passID, passPrice, remainingUses, rentalID, startDate.toString(), equipmentType, equipmentSize));
+                System.out.printf("%-10d %-30s %-30s %-10d %-10d %-10d %-10d %-20s %-20s %-10s%n",
+                        memberID, name, email, passID, passPrice, remainingUses, rentalID,
+                        startDate.toString(), equipmentType, equipmentSize);
             }
         }
         catch (SQLException e) {
@@ -1560,5 +1871,7 @@ public class Prog4 {
             System.err.println("\tErrorCode: " + e.getErrorCode());
             System.exit(-1);
         }
+
+
     }
 }

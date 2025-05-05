@@ -1263,13 +1263,13 @@ public class Prog4 {
         """;
 
         // String Length for formatting purposes.
-        // Values are based on Varchar2(x) as defined in DB (with some padding)
+        // Values are based on Varchar2(x) as defined in DB (with some padding) 
         final int trailStrLen = 30 + 5;
         final int catStrLen = 20 + 5;
         final int liftStrLen = 20;
 
         try {
-            Statement statement = dbconn.createStatement();
+        	Statement statement = dbconn.createStatement();
             ResultSet result = statement.executeQuery(query);
 
             ResultSetMetaData resultMetadata = result.getMetaData();
@@ -1278,15 +1278,15 @@ public class Prog4 {
             // Output Table Headers
             System.out.println('\n');
             System.out.print(padRight(resultMetadata.getColumnName(1), trailStrLen));  // TrailName
-            System.out.print(padRight(resultMetadata.getColumnName(2), catStrLen));	// Category
-            System.out.print(padRight(resultMetadata.getColumnName(3), liftStrLen));	// ConnectedTrails
+            System.out.print(padRight(resultMetadata.getColumnName(2), catStrLen));	// Category   
+            System.out.print(padRight(resultMetadata.getColumnName(3), liftStrLen));	// ConnectedTrails             
             System.out.println("\n_________________________________________________________________________________\n");
 
             while(result.next()) {
                 String trailName = result.getString("TrailName");
                 String category = result.getString("Category");
 
-                String connectedLifts = result.getString("ConnectedLifts");
+            	String connectedLifts = result.getString("ConnectedLifts");
                 String[] lifts = connectedLifts.split(",\\s*");
 
                 System.out.print(padRight(trailName, trailStrLen));
@@ -1338,7 +1338,7 @@ public class Prog4 {
         """, price);
 
         try {
-            Statement statement = dbconn.createStatement();
+        	Statement statement = dbconn.createStatement();
             ResultSet result = statement.executeQuery(query);
 
             ResultSetMetaData resultMetadata = result.getMetaData();

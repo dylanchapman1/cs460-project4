@@ -1,5 +1,5 @@
 /*
- * Author(s): Dylan Chapman
+ * Author(s): Dylan Chapman, Andrew Hicks, Adam Tilkens
  * Class:     CSC460
  * Date:      5/6/2025
  * Program:   Prog4.java
@@ -13,23 +13,22 @@ import java.util.*;
 // export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${CLASSPATH}
 
 public class Prog4 {
-
-    /*
-    Name: getMenuChoice
-
-    Purpose: Captures a user's input to figure out what query to run
-
-    Pre-Conditions: None
-
-    Post-Conditions: The (final) returned value will always be 1-10
-
-    Parameters:
-    scanner (Scanner): Scanner object to capture user's input
-
-    Returns:
-    integer detailing what query a user wants to run.
-     */
     public static int getMenuChoice(Scanner scanner) {
+            /*
+        Name: getMenuChoice
+
+        Purpose: Captures a user's input to figure out what query to run
+
+        Pre-Conditions: None
+
+        Post-Conditions: The (final) returned value will always be 1-10
+
+        Parameters:
+        scanner (Scanner): Scanner object to capture user's input
+
+        Returns:
+        integer detailing what query a user wants to run.
+        */
         while (true) {
             System.out.println("""
                 Select a query!
@@ -62,6 +61,18 @@ public class Prog4 {
     }
 
     public static ArrayList<Integer> getMemberIDs(Connection dbconn) {
+        /*
+        Name: getMemberIDs
+
+        Purpose: Query all memberIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all memberIDs in the database as ArrayList<Integer>
+        */
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT MEMBERID FROM dylanchapman.MEMBER";
 
@@ -69,8 +80,8 @@ public class Prog4 {
             Statement statement = dbconn.createStatement();
             ResultSet answer = statement.executeQuery(query);
 
-            if (answer != null) {
-                while (answer.next())
+            if(answer != null) {
+                while(answer.next())
                     IDs.add(answer.getInt("MEMBERID"));
             }
         }
@@ -87,6 +98,18 @@ public class Prog4 {
     }
 
     public static ArrayList<Integer> getRentalIDs(Connection dbconn) {
+        /*
+        Name: getRentalIDs
+
+        Purpose: Query all memberIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all rentalIDs in the database as ArrayList<Integer>
+        */
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT RENTALID FROM dylanchapman.EQUIPMENTRENTAL";
     
@@ -107,6 +130,18 @@ public class Prog4 {
     }    
 
     public static ArrayList<Integer> getItemIDs(Connection dbconn) {
+        /*
+        Name: getItemIDs
+
+        Purpose: Query all itemIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all itemIDs in the database as ArrayList<Integer>
+        */
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT ITEMID FROM dylanchapman.EQUIPMENT";
     
@@ -122,11 +157,22 @@ public class Prog4 {
         catch(SQLException e) {
             System.err.println("error: " + e.getMessage());
         }
-    
         return IDs;
     } 
 
     public static ArrayList<Integer> getPassIDs(Connection dbconn) {
+        /*
+        Name: getPassIDs
+
+        Purpose: Query all passIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all passIDs in the database as ArrayList<Integer>
+        */
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT PASSID FROM dylanchapman.SKIPASS";
 
@@ -152,6 +198,18 @@ public class Prog4 {
     }
     
     public static ArrayList<Integer> getOrderIDs(Connection dbconn) {
+        /*
+        Name: getOrderIDs
+
+        Purpose: Query all OrderIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all OrdersIDs in the database as ArrayList<Integer>
+        */
         ArrayList<Integer> IDs = new ArrayList<>();
         String query = "SELECT OrderID FROM dylanchapman.LESSONPURCHASE";
 
@@ -177,6 +235,18 @@ public class Prog4 {
     }
 
     public static void addMember(Scanner scanner, Connection dbconn) {
+        /*
+        Name: addMember
+
+        Purpose: Insert a new member record into the database
+
+        Pre-Conditions: Valid DB connection, initialized scanner object
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all itemIDs in the database as ArrayList<Integer>
+        */
         String query;
         System.out.println("""
                         Please add all necessary fields, and SEPARATE THEM WITH COMMAS
@@ -387,9 +457,6 @@ public class Prog4 {
             System.err.println("\tSQLState:  " + e.getSQLState());
             System.err.println("\tErrorCode: " + e.getErrorCode());
         }
-
-
-
     }
 
     public static void addSkiPass(Scanner scanner, Connection dbconn) {
@@ -1247,8 +1314,57 @@ public class Prog4 {
 
     }
 
-    public static void CustomQuery() {
+    public static void CustomQuery(Scanner scanner, Connection dbconn) {
+        System.out.println("Please enter your desired price:");
+        int price = scanner.nextInt();
+        scanner.nextLine(); // I'm pretty sure we need this
 
+        String query = String.format("""
+        SELECT m.memberID, 
+        m.name, 
+        m.email, 
+        sp.passID, 
+        sp.price, 
+        sp.remainingUses, 
+        er.rentalID, 
+        er.startdate, 
+        e.type, 
+        e.itemsize 
+        FROM dylanchapman.Member m 
+        JOIN dylanchapman.SkiPass sp ON m.memberID = sp.memberID 
+        JOIN dylanchapman.EquipmentRental er ON sp.passID = er.passID 
+        JOIN dylanchapman.Equipment e ON er.itemID = e.itemID 
+        WHERE sp.price > %d       
+        """, price);
+
+        try {
+        	Statement statement = dbconn.createStatement();
+            ResultSet result = statement.executeQuery(query);
+
+            ResultSetMetaData resultMetadata = result.getMetaData();
+
+            while(result.next()) {
+                int memberID = result.getInt("memberID");
+                String name = result.getString("name");
+                String email = result.getString("email");
+                int passID = result.getInt("passID");
+                int passPrice = result.getInt("price");
+                int remainingUses = result.getInt("remainingUses");
+                int rentalID = result.getInt("rentalID");
+                Timestamp startDate = result.getTimestamp("startdate");
+                String equipmentType = result.getString("type");
+                String equipmentSize = result.getString("itemsize");
+
+                System.out.println("%-10d, %-30s, %-30s, %-10d, %-10d, %-10d, %-10d, %-20s, %-20s, %-20s".formatted(
+                        memberID, name, email, passID, passPrice, remainingUses, rentalID, startDate.toString(), equipmentType, equipmentSize));
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
     }
 
     // Helper function for formatting, fills the right of a string
@@ -1430,7 +1546,7 @@ public class Prog4 {
                     case 6 -> GetMemberSkiLessonDetails(scanner, dbconn);
                     case 7 -> GetSkiPassUsageDetails(scanner, dbconn);
                     case 8 -> GetOpenIntermediateTrails(dbconn);
-                    case 9 -> CustomQuery();
+                    case 9 -> CustomQuery(scanner, dbconn);
                 }
 
                 statement.close();

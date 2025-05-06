@@ -1761,7 +1761,7 @@ public class Prog4 {
          auditID = 1; // Empty Table Failsafe
     	}
     	
-    	String query = String.format("INSERT INTO dylanchapman.auditLog VALUES (%d,'%s','%s','%s', SYSDATE)",
+    	String query = String.format("INSERT INTO dylanchapman.auditLog VALUES (%d,'%s','%s','%s', SYSTIMESTAMP)",
     			auditID, // auditID
     			table, // tableName
     			pk, // identifier (PK)

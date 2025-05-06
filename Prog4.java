@@ -989,6 +989,7 @@ public class Prog4 {
         try (Statement stmt = dbconn.createStatement()) {
             int count = stmt.executeUpdate(updateQuery);
             if (count > 0) {
+            	audit(dbconn, "Equipment", String.valueOf(itemID), "Delete");
                 System.out.printf("Equipment with ItemID %d has been archived successfully.\n", itemID);
             }
             else {
@@ -1239,6 +1240,7 @@ public class Prog4 {
         try(Statement stmt = dbconn.createStatement()) {
             int rows = stmt.executeUpdate(archiveQuery);
             if(rows > 0) {
+            	audit(dbconn, "EquipmentRental", String.valueOf(rentalID), "Delete");
                 System.out.printf("Rental with RentalID %d archived successfully.\n", rentalID);
             }
             else {
@@ -1735,22 +1737,22 @@ public class Prog4 {
         return String.format("%-" + length + "s", str); // Pad with spaces
     }
     
-    private static void audit(Connection dbconn, String table, String pk, String operation) {
-    	/*
-        Name: audit
+    /*
+    Name: audit
 
-        Purpose: Accepts values to log into auditlog table for purposes of record keeping.
+    Purpose: Accepts values to log into auditlog table for purposes of record keeping.
 
-        Pre-Conditions: Valid DB connection
+    Pre-Conditions: Valid DB connection
 
-        Parameters:
-        dbconn (Connection): Connection to oracle database
-        table (String): Name of the table being altered
-        pk (String): The primary key of the object for reference.
-		operation (String): The operation performed (Add, Update, Delete)
+    Parameters:
+    dbconn (Connection): Connection to oracle database
+    table (String): Name of the table being altered
+    pk (String): The primary key of the object for reference.
+	operation (String): The operation performed (Add, Update, Delete)
 
-        Returns: None (void)
-        */
+    Returns: None (void)
+    */
+    private static void audit(Connection dbconn, String table, String pk, String operation) {   	
     	
     	int auditID;
     	try {

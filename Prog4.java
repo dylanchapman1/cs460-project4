@@ -749,34 +749,32 @@ public class Prog4 {
         System.out.println("Please enter the PassID of the user you wish to delete a Ski Pass for:");
         int passID = scanner.nextInt();
 
-        System.out.println("Please enter the MemberID of the user you wish to delete a Ski Pass for");
-        int memberID = scanner.nextInt();
-        scanner.nextLine(); // I'm pretty sure we need this
 
-        if (!getMemberIDs(dbconn).contains(memberID) || !getPassIDs(dbconn).contains(passID)) {
-            System.out.println("PassID/MemberID does not exist!\n");
+        if (!getPassIDs(dbconn).contains(passID)) {
+            System.out.println("PassID does not exist!\n");
             return;
         }
 
-        String query = String.format("SELECT REMAININGUSES, EXPIRATIONDATE FROM dylanchapman.SkiPass WHERE PASSID = %d AND MEMBERID = %d", passID, memberID);
+        String query = String.format("SELECT MEMBERID, REMAININGUSES, EXPIRATIONDATE FROM dylanchapman.SkiPass WHERE PASSID = %d", passID);
         ResultSet answer = null;
 
         try {
             Statement statement = dbconn.createStatement();
-            answer = statement.executeQuery(query);
+            answer = statement.executeQuery(query);            
+            
 
             if (answer != null) {
                 while (answer.next()) {
                     int remaining = Integer.parseInt(answer.getString("REMAININGUSES"));
+                    int memberID = Integer.parseInt(answer.getString("MEMBERID"));
                     String expired = answer.getString("EXPIRATIONDATE").split(" ")[0];
 
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                     LocalDate currentDate = LocalDate.now();
                     LocalDate expirationDate = LocalDate.parse(expired, formatter);
 
-                    if (currentDate.isAfter(expirationDate) && remaining == 0) {
-                        String deleteQuery = String.format("UPDATE dylanchapman.SkiPass SET ACTIVE = %d, WHERE PASSID = %d AND MEMBERID = %d", 0, passID, memberID);
-
+                    if (currentDate.isAfter(expirationDate) || remaining == 0) {
+                        String deleteQuery = String.format("UPDATE dylanchapman.SkiPass SET ACTIVE = %d WHERE PASSID = %d", 0, passID);
                         try {
                             Statement deleteStatement = dbconn.createStatement();
                             deleteStatement.executeUpdate(deleteQuery);

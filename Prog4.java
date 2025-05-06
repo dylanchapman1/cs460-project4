@@ -273,6 +273,43 @@ public class Prog4 {
 
         return IDs;
     }
+    
+    public static ArrayList<Integer> getAuditIDs(Connection dbconn) {
+        /*
+        Name: getAuditIDs
+
+        Purpose: Query all AuditIDs from the database for validation
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+
+        Returns: Returns a list of all AuditIDs in the database as ArrayList<Integer>
+        */
+        ArrayList<Integer> IDs = new ArrayList<>();
+        String query = "SELECT auditID FROM dylanchapman.AuditLog";
+
+        try {
+            Statement statement = dbconn.createStatement();
+            ResultSet answer = statement.executeQuery(query);
+
+            if (answer != null) {
+                while (answer.next())
+                    IDs.add(answer.getInt("auditID"));
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("*** SQLException: Could not fetch AuditID.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+            System.exit(-1);
+
+        }
+
+        return IDs;
+    }
 
     /*
     Name: addMember
@@ -310,6 +347,7 @@ public class Prog4 {
         try {
             Statement statement = dbconn.createStatement();
             statement.executeUpdate(query);
+            audit(dbconn, "Member", String.valueOf(currentID), "Add");
             System.out.printf("Member added successfully! Your member ID is %s\n\n", currentID);
         }
 
@@ -331,7 +369,7 @@ public class Prog4 {
     Parameters:
     dbconn (Connection): Connection to oracle database
 
-    Returns: Returns: None, as the method is void
+    Returns: None, as the method is void
     */
     public static void updateMember(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the MemberID of the user you wish to update:");
@@ -363,6 +401,7 @@ public class Prog4 {
         try {
             Statement statement = dbconn.createStatement();
             statement.executeUpdate(query);
+            audit(dbconn, "Member", String.valueOf(memberID), "Update");
             System.out.printf("Your information has been updated successfully! Your member ID is %d\n\n", memberID);
         }
 
@@ -386,7 +425,7 @@ public class Prog4 {
     Parameters:
     dbconn (Connection): Connection to oracle database
 
-    Returns: Returns: None, as the method is void
+    Returns: None, as the method is void
     */
     public static void deleteMember(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the MemberID of the user you wish to update:");
@@ -482,6 +521,7 @@ public class Prog4 {
                     String deleteMember = String.format("DELETE FROM Member WHERE memberID = %d", memberID);
                     try (Statement stmt = dbconn.createStatement()) {
                         stmt.executeUpdate(deleteMember);
+                        audit(dbconn, "Member", String.valueOf(memberID), "Delete");
                     }
 
                     dbconn.commit(); // All deletions succeeded
@@ -535,7 +575,7 @@ public class Prog4 {
     Parameters:
     dbconn (Connection): Connection to oracle database
 
-    Returns: None, as the method is void
+     None, as the method is void
     */
     public static void addSkiPass(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter the MemberID of the user you wish to buy a Ski Pass for:");
@@ -581,6 +621,7 @@ public class Prog4 {
         try {
             Statement statement = dbconn.createStatement();
             statement.executeUpdate(query);
+            audit(dbconn, "SkiPass", String.valueOf(passID), "Add");
             System.out.printf("Ski Pass purchased for member ID %s!\n\n", memberID);
         }
 
@@ -677,6 +718,7 @@ public class Prog4 {
             prep.setInt(i+1, passID);
             int count = prep.executeUpdate();
             if(count > 0) {
+            	audit(dbconn, "SkiPass", String.valueOf(passID), "Update");
                 System.out.println("Ski pass updated");
             }
             else {
@@ -738,6 +780,7 @@ public class Prog4 {
                         try {
                             Statement deleteStatement = dbconn.createStatement();
                             deleteStatement.executeUpdate(deleteQuery);
+                            audit(dbconn, "SkiPass", String.valueOf(passID), "Delete");
                             System.out.printf("Ski Pass, with PassID %d, deleted for member ID %d!\n\n", passID, memberID);
                         }
 
@@ -811,6 +854,7 @@ public class Prog4 {
 
             Statement statement = dbconn.createStatement();
             statement.executeQuery(query);
+            audit(dbconn, "Equipment", String.valueOf(itemID), "Add");
             System.out.println("Equipment added!\n");
         }
 
@@ -888,6 +932,7 @@ public class Prog4 {
 
             int count = prep.executeUpdate();
             if(count > 0) {
+            	audit(dbconn, "Equipment", String.valueOf(itemID), "Delete");
                 System.out.println("Equipment updated successfully!\n");
             }
             else {
@@ -1011,6 +1056,7 @@ public class Prog4 {
 
             Statement statement = dbconn.createStatement();
             statement.executeUpdate(query);
+            audit(dbconn, "EquipmentRental", String.valueOf(currentID), "Add");
             System.out.printf("Rental added successfully! Your rental ID is %d\n\n", currentID);
         }
         catch (SQLException e) {
@@ -1023,7 +1069,7 @@ public class Prog4 {
     }
 
     /*
-    Name: addEquipmentRental
+    Name: updateEquipmentRental
 
     Purpose: Updates an equipment rental record from the database, by having an
              admin enter all quantifying information. Updates can also change the
@@ -1094,6 +1140,7 @@ public class Prog4 {
                 prep.setInt(7, rentalID);
                 int count = prep.executeUpdate();
                 if(count > 0) {
+                	audit(dbconn, "EquipmentRental", String.valueOf(rentalID), "Update");
                     System.out.println("Rental record updated successfully!\n");
                 }
                 else {
@@ -1258,6 +1305,7 @@ public class Prog4 {
         try {
             Statement statement = dbconn.createStatement();
             statement.executeUpdate(query);
+            audit(dbconn, "LessonPurchase", String.valueOf(currentID), "Add");
             System.out.printf("LessonPurchase ID %d has successfully been registered. \n", currentID);
         }
 
@@ -1330,6 +1378,7 @@ public class Prog4 {
         try {
             Statement statement = dbconn.createStatement();
             statement.executeUpdate(query);
+            audit(dbconn, "LessonPurchase", String.valueOf(orderID), "Update");
             System.out.printf("Lesson Purchase Order ID %d has been succesfully updated\n\n", orderID);
         }
 
@@ -1381,14 +1430,12 @@ public class Prog4 {
             // We can ONLY delete a LessonPurchase record if TotalUses = 0 (unused)
             if (fetchedTotalUses == 0) {
                 statement.executeUpdate(queryDelete);
+                audit(dbconn, "LessonPurchase", String.valueOf(orderID), "Delete");
+                System.out.printf("Lesson Purchase Order ID %d has been succesfully deleted.\n\n", orderID);
             }else {
                 System.out.printf("The Lesson Purchase OrderID #%s has '%s' use(s), so cannot be deleted.\n\n",
-                        orderID, fetchedTotalUses);
-                return;
-            }
-
-
-            System.out.printf("Lesson Purchase Order ID %d has been succesfully deleted.\n\n", orderID);
+                        orderID, fetchedTotalUses);                
+            }            
         }
 
         catch (SQLException e) {
@@ -1621,7 +1668,7 @@ public class Prog4 {
     Parameters:
     dbconn (Connection): Connection to oracle database
 
-    Returns: Returns: None, as the method is void
+    Returns: None, as the method is void
     */
     public static void CustomQuery(Scanner scanner, Connection dbconn) {
         System.out.println("Please enter your desired price:");
@@ -1688,6 +1735,53 @@ public class Prog4 {
             return str.substring(0, length); // Trim if too long
         }
         return String.format("%-" + length + "s", str); // Pad with spaces
+    }
+    
+    private static void audit(Connection dbconn, String table, String pk, String operation) {
+    	/*
+        Name: audit
+
+        Purpose: Accepts values to log into auditlog table for purposes of record keeping.
+
+        Pre-Conditions: Valid DB connection
+
+        Parameters:
+        dbconn (Connection): Connection to oracle database
+        table (String): Name of the table being altered
+        pk (String): The primary key of the object for reference.
+		operation (String): The operation performed (Add, Update, Delete)
+
+        Returns: None (void)
+        */
+    	
+    	int auditID;
+    	try {
+    	 auditID = Collections.max(getAuditIDs(dbconn)) + 1;
+    	} catch (NoSuchElementException e) {
+         auditID = 1; // Empty Table Failsafe
+    	}
+    	
+    	String query = String.format("INSERT INTO dylanchapman.auditLog VALUES (%d,'%s','%s','%s', SYSDATE)",
+    			auditID, // auditID
+    			table, // tableName
+    			pk, // identifier (PK)
+    			operation // Operation   			
+    			);    	   	
+    	
+    	try {
+    		Statement statement = dbconn.createStatement();
+            statement.executeUpdate(query);
+    	}
+    	
+    	catch (SQLException e) {
+            System.err.println("*** SQLException: Error inserting new Audit Log entry.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+        }
+    	
+    	
+    	
     }
 
     public static void main(String[] args) {

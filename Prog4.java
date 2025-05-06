@@ -417,7 +417,7 @@ public class Prog4 {
     Name: deleteMember
 
     Purpose: Deletes a member from the DB, making sure that before deletion no
-             existing datac like skip passes or lessons are active for the given
+             existing data like skip passes or lessons are active for the given
              user
 
     Pre-Conditions: Valid DB connection, initialized scanner object
@@ -428,7 +428,7 @@ public class Prog4 {
     Returns: None, as the method is void
     */
     public static void deleteMember(Scanner scanner, Connection dbconn) {
-        System.out.println("Please enter the MemberID of the user you wish to update:");
+        System.out.println("Please enter the MemberID of the user you wish to delete:");
         int memberID = scanner.nextInt();
         scanner.nextLine(); // I'm pretty sure we need this
 
@@ -494,13 +494,13 @@ public class Prog4 {
                     dbconn.setAutoCommit(false); // Start transaction
 
                     // Delete lift usage logs
-                    String deleteLiftUsage = String.format("DELETE FROM LiftUsage WHERE passID = %d", skiPassID);
+                    String deleteLiftUsage = String.format("DELETE FROM dylanchapman.LiftUsage WHERE passID = %d", skiPassID);
                     try (Statement stmt = dbconn.createStatement()) {
                         stmt.executeUpdate(deleteLiftUsage);
                     }
 
                     // Delete ski pass data
-                    String deleteSkiPass = String.format("DELETE FROM SkiPass WHERE memberID = %d", memberID);
+                    String deleteSkiPass = String.format("DELETE FROM dylanchapman.SkiPass WHERE memberID = %d", memberID);
                     try (Statement stmt = dbconn.createStatement()) {
                         stmt.executeUpdate(deleteSkiPass);
                     }
@@ -518,7 +518,7 @@ public class Prog4 {
                     }
 
                     // Finally, delete the member
-                    String deleteMember = String.format("DELETE FROM Member WHERE memberID = %d", memberID);
+                    String deleteMember = String.format("DELETE FROM dylanchapman.Member WHERE memberID = %d", memberID);
                     try (Statement stmt = dbconn.createStatement()) {
                         stmt.executeUpdate(deleteMember);
                         audit(dbconn, "Member", String.valueOf(memberID), "Delete");
